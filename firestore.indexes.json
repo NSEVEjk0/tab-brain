@@ -1,0 +1,25 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "emailPlans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "enabled", "order": "ASCENDING" },
+        { "fieldPath": "nextRunAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "emailPlans",
+      "fieldPath": "bookmarks",
+      "indexes": []
+    },
+    { "collectionGroup": "emailPlans", "fieldPath": "pending", "indexes": [] },
+    {
+      "collectionGroup": "emailPlans",
+      "fieldPath": "sentReminderAt",
+      "indexes": []
+    }
+  ]
+}

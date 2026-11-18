@@ -1,0 +1,25 @@
+{
+  "name": "tab-brain-email",
+  "private": true,
+  "version": "1.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "npm run check && esbuild src/index.ts src/delivery.ts src/resend.ts src/verification.ts --bundle --platform=node --target=node22 --format=esm --packages=external --outdir=lib",
+    "test": "node --test tests/*.unit.mjs",
+    "test:emulator": "node --test tests/delivery.integration.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.1",
+    "firebase-functions": "7.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.0",
+    "esbuild": "0.27.0",
+    "typescript": "5.9.3"
+  }
+}

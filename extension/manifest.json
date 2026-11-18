@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Brain",
+  "description": "Save readable tabs on your device, recall them offline, and approve selected sources for Firebase AI answers.",
+  "version": "1.1.0",
+  "minimum_chrome_version": "139",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "sidePanel",
+    "alarms",
+    "notifications"
+  ],
+  "host_permissions": ["https://*/*", "http://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Tab Brain"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Open Tab Brain"
+    },
+    "snap-this-page": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Remember this page in Tab Brain"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.googleapis.com;"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvPI7Ri2OtMzRB37bXANBuvROGVx1nqvYNAfUsJiueu3+hne7HzvWNsjAbE/N+Pxu8LZrYB6jFTChOHYx/VbZ9XJ3UHBKa6tVbEI1818o4jSg4uLBbOQa/OL4vrfSxciH3NWN6BufYnHqieIFqj8Mo2j5/ponBabAUEiX/MTrsv9TNbPLvuz9i3VfMoacKHUDrPrfvuqSB/chX5tiQL/RsTjjmWQH1iWCHDS75z1bqzzZhs0p+cVKM8VhhMQYQ5oPGZK9mbD9NLPC3V9cUi7LGMBc8yJK+V7VJdP0MrCbb4zZs00SIYlHzvqBELZVjZG5IjDr7MBaYTXlHWDFPtSVxwIDAQAB"
+}
