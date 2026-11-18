@@ -1,5 +1,6 @@
 import { deleteApp, initializeApp } from "firebase/app";
 import {
+  getToken,
   initializeAppCheck,
   ReCaptchaEnterpriseProvider,
 } from "firebase/app-check";
@@ -16,6 +17,7 @@ import { excerpt, parseAnswer, sentences } from "./library";
 import { cloudModelName, idleAIStatus, publishAIStatus } from "./aiStatus";
 
 type Models = {
+  appCheck: ReturnType<typeof initializeAppCheck>;
   local: ReturnType<typeof getGenerativeModel>;
   cloud: ReturnType<typeof getGenerativeModel>;
   key: string;
@@ -55,7 +57,7 @@ export function configureModels(config: AIConfig): Models {
       self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }
     ).FIREBASE_APPCHECK_DEBUG_TOKEN = false;
   }
-  initializeAppCheck(app, {
+  const appCheck = initializeAppCheck(app, {
     provider: new ReCaptchaEnterpriseProvider(
       config.siteKey || "tab-brain-development",
     ),
@@ -64,6 +66,7 @@ export function configureModels(config: AIConfig): Models {
   const ai = getAI(app, { backend: new GoogleAIBackend() });
   models = {
     key,
+    appCheck,
     local: getGenerativeModel(ai, {
       mode: InferenceMode.ONLY_ON_DEVICE,
       onDeviceParams: {
@@ -93,6 +96,44 @@ export function configureModels(config: AIConfig): Models {
     }),
   };
   return models;
+}
+
+async function verifiedModels(config: AIConfig): Promise<Models> {
+  const current = configureModels(config);
+  const result = await getToken(current.appCheck);
+  if (!result.token || result.token.split(".").length !== 3)
+    throw new Error(
+      "Firebase App Check returned no valid token. Verify the connection in Settings and try again.",
+    );
+  return current;
+}
+
+export async function verifyConnection(config: AIConfig): Promise<void> {
+  publishAIStatus({
+    phase: "preparing",
+    location: "cloud",
+    label: "Verifying this browser",
+    detail:
+      "Firebase App Check is verifying the registered browser connection.",
+  });
+  try {
+    await verifiedModels(config);
+    publishAIStatus({
+      phase: "complete",
+      location: "cloud",
+      label: "Browser verified",
+      detail:
+        "Firebase App Check issued a token for this browser. An approved cloud question still needs to test the model.",
+    });
+  } catch (error) {
+    publishAIStatus({
+      phase: "error",
+      location: "cloud",
+      label: "Browser verification failed",
+      detail: friendlyError(error),
+    });
+    throw error;
+  }
 }
 export function localModelReady() {
   return deviceReady;
@@ -247,18 +288,25 @@ export async function askCloud(
     );
   const name = cloudModelName(config.model);
   publishAIStatus({
-    phase: "working",
+    phase: "preparing",
     location: "cloud",
-    label: `${name} · cloud`,
-    model: config.model,
-    detail: `Sending ${preview.sources.length} approved source snippets through Firebase AI Logic.`,
+    label: "Verifying this browser",
+    detail:
+      "Firebase App Check must verify this browser before the approved sources are sent.",
   });
   try {
-    const { cloud } = configureModels(config);
+    const { cloud } = await verifiedModels(config);
+    publishAIStatus({
+      phase: "working",
+      location: "cloud",
+      label: `${name} · cloud`,
+      model: config.model,
+      detail: `Sending ${preview.sources.length} approved source snippets through Firebase AI Logic.`,
+    });
     const instruction =
       'Answer the user’s question using only the approved sources below. Cite supported statements using [1], [2], etc., corresponding to source numbers. Do not cite any source not in the input. Identify missing information instead of guessing. Prices and product details are as captured, not live facts. If sources are fictional sample data, explicitly say this is a sample comparison. Return JSON with {"answer":"clear answer with [n] citations","unknowns":["missing fact"]}. Do not use Markdown links or raw HTML.\nAPPROVED_UNTRUSTED_SOURCE_DATA:\n';
     const result = await cloud.generateContent(
-      instruction + preview.requestText,
+      instruction + approvedRequestText,
     );
     if (result.response.inferenceSource !== InferenceSource.IN_CLOUD)
       throw new Error(
@@ -302,13 +350,23 @@ export function resetModels() {
 export function friendlyError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (
+    /local language.?model|language.?model.*not.*(available|supported)/i.test(
+      message,
+    )
+  )
+    return "On-device AI is unavailable in this browser. Use compatible desktop Chrome with the model downloaded. Saved excerpts and offline search still work.";
+  if (/app.?check\/recaptcha-error|recaptcha error/i.test(message))
+    return "Browser verification failed. Check that your reCAPTCHA Enterprise key allows this website, then retry in a regular browser.";
+  if (
     /api-not-enabled|firebase ai (logic )?api.*(not.*enabled|to be enabled)|has not been used.*disabled/i.test(
       message,
     )
   )
     return "Firebase AI Logic is not enabled for this project yet. Open Firebase → AI Logic → Get started and choose the Gemini Developer API.";
-  if (/app.?check|attestation|403|permission.denied/i.test(message))
-    return "Firebase could not verify this app. Check that AI Logic is enabled and your App Check token or site key is registered.";
+  if (/app.?check|attestation/i.test(message))
+    return "Firebase could not verify this browser. Use Verify connection in Settings, and check that its site key or private development token is registered.";
+  if (/403|permission.denied/i.test(message))
+    return "Firebase refused this request. Check the project's AI Logic access and App Check settings.";
   if (/429|quota|resource.exhausted/i.test(message))
     return "The Firebase request limit was reached. Your local library is safe; try again later.";
   if (

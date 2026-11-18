@@ -181,14 +181,12 @@ test("favorites and archive restore remain consistent across navigation and relo
     .getByRole("button", { name: /^Favorites/ })
     .click();
   await expect(page.locator(".memory-card")).toHaveCount(4);
-  const card = page
-    .locator(".memory-card")
-    .filter({
-      has: page.getByRole("button", {
-        name: "Read React patterns worth keeping",
-        exact: true,
-      }),
-    });
+  const card = page.locator(".memory-card").filter({
+    has: page.getByRole("button", {
+      name: "Read React patterns worth keeping",
+      exact: true,
+    }),
+  });
   await card
     .getByRole("button", {
       name: "More options for React patterns worth keeping",
@@ -466,15 +464,13 @@ test("backups exclude AI settings and reject invalid imported sources without ch
   page,
 }) => {
   await page.goto("/#settings");
-  await page
-    .getByLabel("Firebase Web app configuration")
-    .fill(
-      JSON.stringify({
-        apiKey: "TEST_NOT_A_REAL_KEY",
-        projectId: "test-project",
-        appId: "TEST_NOT_A_REAL_APP",
-      }),
-    );
+  await page.getByLabel("Firebase Web app configuration").fill(
+    JSON.stringify({
+      apiKey: "TEST_NOT_A_REAL_KEY",
+      projectId: "test-project",
+      appId: "TEST_NOT_A_REAL_APP",
+    }),
+  );
   await page.getByLabel("App Check verification").selectOption("debug");
   await page
     .getByLabel("App Check development token")
@@ -484,6 +480,9 @@ test("backups exclude AI settings and reject invalid imported sources without ch
     page.getByText("Configuration saved", { exact: true }),
   ).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
+  await expect(
+    page.getByRole("button", { name: "Verify connection", exact: true }),
+  ).toBeEnabled();
   await page
     .getByRole("button", { name: "Export backup", exact: true })
     .click();
@@ -495,13 +494,11 @@ test("backups exclude AI settings and reject invalid imported sources without ch
   expect(raw).not.toContain("TEST_NOT_A_REAL_TOKEN");
   expect(raw).not.toContain("tabId");
   backup.memories[0].url = "javascript:alert(1)";
-  await page
-    .getByLabel("Import Tab Brain backup")
-    .setInputFiles({
-      name: "invalid-source.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.getByLabel("Import Tab Brain backup").setInputFiles({
+    name: "invalid-source.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await expect(page.getByRole("alert")).toContainText("http");
   await page
     .getByRole("navigation", { name: "Main navigation" })

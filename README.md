@@ -41,7 +41,7 @@ The optional email service also uses Firebase. Authentication verifies the recip
 
 The web companion and extension support capture, local storage, search, notes, collections, favourites, archive, reading status, reminders, calendar export, and backups. You can preview and download a reading brief without an account or an email provider.
 
-On November 18, a real cloud request reached Firebase but returned `AI/api-not-enabled`: the Firebase AI Logic API was disabled in the supplied project. The App Check registration alone did not complete that setup. This server’s Chromium also reported the on-device model as unavailable. These results are recorded in [the validation notes](docs/validation.md).
+Browser verification is the remaining blocker for real cloud testing on this server. After the project's API setup changed on November 18, the cloud request got past its earlier API-disabled error, but reCAPTCHA failed before Firebase could issue an App Check token. The app now checks verification before sending approved source text, and Settings has a **Verify connection** button. This server's Chromium also reported the on-device model as unavailable. Successful inference still needs a normal-browser cloud test and a supported computer for Nano. These results are recorded in [the validation notes](docs/validation.md).
 
 Scheduled email delivery is prepared in the repository and disabled on the public deployment. It still needs a billing-enabled Firebase project, a Resend account, a verified sender, and private credential setup. A preview or a passing transport test is not evidence that an email reached an inbox.
 

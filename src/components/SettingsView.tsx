@@ -12,7 +12,7 @@ import {
   Upload,
 } from "lucide-react";
 import { APP_CHECK_SESSION_KEY, isExtension } from "../constants";
-import { friendlyError, initializeLocal } from "../ai";
+import { friendlyError, initializeLocal, verifyConnection } from "../ai";
 import { validateAIConfig } from "../library";
 import {
   DEFAULT_CLOUD_MODEL,
@@ -60,7 +60,7 @@ export function SettingsView({
   const [model, setModel] = useState(settings.ai?.model ?? DEFAULT_CLOUD_MODEL);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"local" | "verify">();
   const [progress, setProgress] = useState(0);
   const [confirmClear, setConfirmClear] = useState(false);
   async function save(event: React.FormEvent) {
@@ -84,7 +84,7 @@ export function SettingsView({
   }
   async function enable() {
     if (!settings.ai) return;
-    setBusy(true);
+    setBusy("local");
     setError("");
     setMessage("");
     setProgress(0);
@@ -97,7 +97,23 @@ export function SettingsView({
     } catch (error) {
       setError(friendlyError(error));
     } finally {
-      setBusy(false);
+      setBusy(undefined);
+    }
+  }
+  async function verify() {
+    if (!settings.ai) return;
+    setBusy("verify");
+    setError("");
+    setMessage("");
+    try {
+      await verifyConnection(settings.ai);
+      setMessage(
+        "Firebase verified this browser. You can now approve a cloud question to test the model.",
+      );
+    } catch (error) {
+      setError(friendlyError(error));
+    } finally {
+      setBusy(undefined);
     }
   }
   return (
@@ -248,14 +264,36 @@ export function SettingsView({
             </label>
           )}
           <div className="form-actions">
-            <button className="button dark" type="submit">
+            <button
+              className="button dark"
+              type="submit"
+              disabled={Boolean(busy)}
+            >
               <Check size={16} />
               Save connection
             </button>
             {settings.ai && (
               <button
+                className="button secondary"
+                type="button"
+                disabled={Boolean(busy)}
+                onClick={verify}
+              >
+                {busy === "verify" ? (
+                  <LoaderCircle size={16} className="spin" />
+                ) : (
+                  <ShieldCheck size={16} />
+                )}
+                {busy === "verify"
+                  ? "Verifying connection…"
+                  : "Verify connection"}
+              </button>
+            )}
+            {settings.ai && (
+              <button
                 className="button ghost"
                 type="button"
+                disabled={Boolean(busy)}
                 onClick={async () => {
                   sessionStorage.removeItem(APP_CHECK_SESSION_KEY);
                   await onSave(undefined);
@@ -295,14 +333,14 @@ export function SettingsView({
           <button
             className="button secondary"
             onClick={enable}
-            disabled={!settings.ai || busy}
+            disabled={!settings.ai || Boolean(busy)}
           >
-            {busy ? (
+            {busy === "local" ? (
               <LoaderCircle size={16} className="spin" />
             ) : (
               <HardDrive size={16} />
             )}{" "}
-            {busy
+            {busy === "local"
               ? `Preparing model${progress ? ` · ${Math.round(progress * 100)}%` : "…"}`
               : "Enable on-device AI"}
           </button>

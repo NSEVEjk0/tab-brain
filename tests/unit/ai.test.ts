@@ -6,7 +6,8 @@ import { previewCloud } from "../../src/library";
 const mocks = vi.hoisted(() => ({
   initializeApp: vi.fn(() => ({ name: "test-app" })),
   deleteApp: vi.fn(async () => undefined),
-  appCheck: vi.fn(),
+  appCheck: vi.fn(() => ({})),
+  getToken: vi.fn(),
   getAI: vi.fn(() => ({})),
   localInitialize: vi.fn(async (progress: (value: number) => void) =>
     progress(0.5),
@@ -21,6 +22,7 @@ vi.mock("firebase/app", () => ({
 }));
 vi.mock("firebase/app-check", () => ({
   initializeAppCheck: mocks.appCheck,
+  getToken: mocks.getToken,
   ReCaptchaEnterpriseProvider: class {
     constructor(public key: string) {}
   },
@@ -58,6 +60,9 @@ const tokens = new Map<string, string>();
 beforeEach(async () => {
   vi.resetModules();
   vi.clearAllMocks();
+  mocks.getToken.mockResolvedValue({
+    token: "TEST.NOT_A_REAL_TOKEN.SIGNATURE",
+  });
   tokens.clear();
   tokens.set("tab-brain-appcheck-token", "TEST_NOT_A_REAL_TOKEN");
   vi.stubGlobal("sessionStorage", {
@@ -91,6 +96,55 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
       ai.askCloud(preview, config, "different sources"),
     ).rejects.toThrow("changed after review");
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+    expect(mocks.getToken).not.toHaveBeenCalled();
+  });
+  it("keeps approved source text out of a generation request when browser verification fails", async () => {
+    mocks.getToken.mockRejectedValueOnce(
+      new Error("AppCheck: ReCAPTCHA error. (appCheck/recaptcha-error)."),
+    );
+    const preview = previewCloud("Question", [memory()]);
+    await expect(
+      ai.askCloud(preview, config, preview.requestText),
+    ).rejects.toThrow("ReCAPTCHA");
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+  });
+  it("refuses the unsigned placeholder token that can follow an App Check failure", async () => {
+    mocks.getToken.mockResolvedValueOnce({
+      token: "TEST_NOT_A_SIGNED_APPCHECK_TOKEN",
+    });
+    const preview = previewCloud("Question", [memory()]);
+    await expect(
+      ai.askCloud(preview, config, preview.requestText),
+    ).rejects.toThrow("no valid token");
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+  });
+  it("can verify the browser without running either model", async () => {
+    await ai.verifyConnection(config);
+    expect(mocks.getToken).toHaveBeenCalled();
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+    expect(mocks.localGenerate).not.toHaveBeenCalled();
+    expect(mocks.localInitialize).not.toHaveBeenCalled();
+  });
+  it("distinguishes the local API-not-enabled error from a disabled Firebase service", () => {
+    expect(
+      ai.friendlyError(
+        new Error(
+          "Local LanguageModel API not available in this environment. (AI/api-not-enabled)",
+        ),
+      ),
+    ).toContain("On-device AI is unavailable");
+    expect(
+      ai.friendlyError(
+        new Error(
+          "Firebase AI Logic API has not been used before or it is disabled. (AI/api-not-enabled)",
+        ),
+      ),
+    ).toContain("Firebase AI Logic is not enabled");
+    expect(
+      ai.friendlyError(
+        new Error("AppCheck: ReCAPTCHA error. (appCheck/recaptcha-error)."),
+      ),
+    ).toContain("Browser verification failed");
   });
   it("does not label a cloud response as an on-device summary", async () => {
     await ai.initializeLocal(config, () => undefined);
@@ -154,13 +208,19 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
           '{"answer":"The captured detail is useful [1].","unknowns":[]}',
       },
     });
-    const response = await ai.askCloud(preview, config, preview.requestText);
+    const approvedText = preview.requestText;
+    const pendingResponse = ai.askCloud(preview, config, approvedText);
+    preview.requestText = "CHANGED_WHILE_BROWSER_VERIFICATION_WAS_PENDING";
+    const response = await pendingResponse;
     expect(response.answer).toContain("[1]");
     expect(response.modelEvidence).toMatchObject({
       name: config.model,
       inferenceSource: "cloud",
     });
-    expect(mocks.cloudGenerate.mock.calls[0][0]).toContain(preview.requestText);
+    expect(mocks.cloudGenerate.mock.calls[0][0]).toContain(approvedText);
+    expect(mocks.cloudGenerate.mock.calls[0][0]).not.toContain(
+      "CHANGED_WHILE_BROWSER_VERIFICATION_WAS_PENDING",
+    );
     expect(mocks.localGenerate).not.toHaveBeenCalled();
   });
 });

@@ -4,12 +4,12 @@ Checked on November 18, 2026, using Node 24 for the app, Node 22 for the email b
 
 | Check | Result |
 | --- | --- |
-| App unit tests | 43 passed across six files. |
+| App unit tests | 47 passed across six files. |
 | Production build | TypeScript, the web build, extension, offline shell, and both download packages passed. |
 | Desktop, mobile, and extension browser checks | All 14 checks passed. |
 | Email backend build and policy tests | The build passed, and all three policy tests passed. |
 | Real local Firestore emulator | All eight delivery tests passed. The email transport was a test fixture. |
-| Real Firebase cloud request | Failed with `403 PERMISSION_DENIED` and `AI/api-not-enabled`. The project's AI Logic service still needed activation. |
+| Real Firebase cloud request | Got past the earlier API-disabled error, then failed App Check with `401 UNAUTHENTICATED` after reCAPTCHA failed in automated Chromium. |
 | Real on-device model availability | Chromium reported `unavailable`; Nano inference could not run on this server. |
 | Actual email delivery | Not attempted. No provider account or verified sender was configured. |
 
@@ -33,7 +33,11 @@ The frontend and backend also check the approved bookmark data format and time z
 
 ## Real AI setup
 
-A real request approved four labelled sample sources and 3,364 source bytes, then reached `firebasevertexai.googleapis.com` for `gemini-3.5-flash-lite`. Firebase reported that its AI Logic API was disabled or had not been used in project `941106573002`. App Check registration and enforcement alone did not enable that service.
+A real request approved four labelled sample sources and 3,364 source bytes, then reached `firebasevertexai.googleapis.com` for `gemini-3.5-flash-lite`. The initial test reported that the AI Logic API was disabled or had not been used in project `941106573002`. After the project's setup changed, the cloud response became `401 UNAUTHENTICATED`: Firebase rejected its App Check token.
+
+A separate trace confirmed that reCAPTCHA Enterprise scripts and the verification iframe loaded. The Firebase SDK reported `appCheck/recaptcha-error` before a signed token could be issued, then its model request used an unsigned placeholder token. The trace recorded only the token's presence, length, and shape; it did not store the token. A headless-browser limitation and a site-key/domain setting remain possible causes. A normal-browser test is still required.
+
+The app now checks App Check before invoking the cloud model, so a verification failure leaves the approved source text local. The **Verify connection** button checks browser verification separately. New unit checks cover failed verification, an unsigned placeholder token, checking the connection without either model, and the distinction between a local `LanguageModel` error and a disabled Firebase service.
 
 Chromium exposed the `LanguageModel` API, but its actual availability check returned `unavailable`. Firebase's device-model initialization also failed. No successful cloud or on-device inference is claimed here. The live badge shows these failures, and model receipts are stored only after the SDK confirms a successful response's execution location.
 

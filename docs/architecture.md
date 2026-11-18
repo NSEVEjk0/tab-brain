@@ -32,7 +32,7 @@ The email branch is optional and disabled on the public deployment until the sen
 
 The capture model is created with `InferenceMode.ONLY_ON_DEVICE`. A button starts the device model so Chrome receives a user interaction for initialization. After a response, the app checks `InferenceSource.ON_DEVICE`, validates the summary structure, and keeps only excerpts found verbatim in the saved text. Unsupported devices keep readable excerpts. There is no automatic cloud fallback for a local capture.
 
-Comparisons use a separate `InferenceMode.ONLY_IN_CLOUD` model. Local search selects candidate memories. The preview contains their titles, URLs, capture dates, short summaries, and relevant excerpts. You can remove a source before sending. The send operation uses an immutable copy of the reviewed payload and checks that it matches the approved request.
+Comparisons use a separate `InferenceMode.ONLY_IN_CLOUD` model. Local search selects candidate memories. The preview contains their titles, URLs, capture dates, short summaries, and relevant excerpts. You can remove a source before sending. The send operation uses an immutable copy of the reviewed payload and checks that it matches the approved request. It obtains an App Check token before invoking the model. If browser verification fails, the source text stays local. Settings can verify App Check separately without generating an answer.
 
 The Firebase SDK must report cloud inference before the answer is saved. The answer must also cite approved source numbers. These checks establish where the model ran and which citations it used. They cannot establish the truth of every generated sentence.
 

@@ -91,6 +91,9 @@ test("production makes AI available without sending sources and respects disconn
   await expect(
     page.getByText("Configuration saved", { exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Verify connection", exact: true }),
+  ).toBeEnabled();
   const config = JSON.parse(
     await page.getByLabel("Firebase Web app configuration").inputValue(),
   );
@@ -114,6 +117,9 @@ test("production makes AI available without sending sources and respects disconn
   await page.getByRole("button", { name: "Disconnect", exact: true }).click();
   await page.reload();
   await expect(page.getByText("Setup needed", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Verify connection", exact: true }),
+  ).toHaveCount(0);
   await page.locator(".ask-nav").click();
   await page
     .getByRole("button", { name: "Compare my research tools", exact: true })
