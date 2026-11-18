@@ -6,7 +6,7 @@ import type {
   Memory,
   Settings,
 } from "./types";
-import { hostedAIConfig } from "./firebaseConfig";
+import { hostedAIConfig, upgradeHostedAIConfig } from "./firebaseConfig";
 import { needsNotification } from "./reminders";
 
 const DB_NAME = "tab-brain-v1";
@@ -20,6 +20,11 @@ const settingsDefault: Settings = {
 function defaultSettings(): Settings {
   const ai = hostedAIConfig();
   return { ...settingsDefault, ...(ai ? { ai } : {}) };
+}
+function mergedSettings(saved?: Settings): Settings {
+  const current = { ...defaultSettings(), ...saved };
+  const ai = upgradeHostedAIConfig(current.ai);
+  return ai === current.ai ? current : { ...current, ai };
 }
 function keepNotificationReceipt(incoming: Memory, current?: Memory): Memory {
   if (
@@ -111,7 +116,7 @@ export async function snapshot(): Promise<LibrarySnapshot> {
     memories,
     collections,
     activity: activity.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 40),
-    settings: { ...defaultSettings(), ...settings },
+    settings: mergedSettings(settings),
   };
 }
 export async function putMemories(
@@ -168,7 +173,7 @@ export async function updateSettings(
   let next = defaultSettings();
   const request = tx.objectStore("settings").get("main");
   request.onsuccess = () => {
-    next = { ...defaultSettings(), ...request.result, ...patch };
+    next = { ...mergedSettings(request.result), ...patch };
     tx.objectStore("settings").put(next, "main");
   };
   await finished;
@@ -238,7 +243,12 @@ export async function initializeLibrary(
   const finished = done(tx);
   const check = tx.objectStore("settings").get("main");
   check.onsuccess = () => {
-    if (check.result?.initialized) return;
+    if (check.result?.initialized) {
+      const next = mergedSettings(check.result);
+      if (next.ai !== check.result.ai)
+        tx.objectStore("settings").put(next, "main");
+      return;
+    }
     memories.forEach((m) => tx.objectStore("memories").put(m));
     collections.forEach((c) => tx.objectStore("collections").put(c));
     tx.objectStore("settings").put(
@@ -308,7 +318,7 @@ export async function recordCloudAttempt(
   let next = defaultSettings();
   const request = tx.objectStore("settings").get("main");
   request.onsuccess = () => {
-    const current = { ...defaultSettings(), ...request.result };
+    const current = mergedSettings(request.result);
     next = {
       ...current,
       cloudBytes: current.cloudBytes + bytes,

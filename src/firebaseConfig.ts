@@ -10,7 +10,8 @@ export const FIREBASE_WEB_CONFIG: Readonly<FirebaseConfig> = {
   appId: "1:941106573002:web:bc755aa7b8c043ebf98e33",
 };
 export const DEFAULT_CLOUD_MODEL = "gemini-3.5-flash-lite";
-const HOSTED_SITE_KEY = "6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIUS";
+const HOSTED_SITE_KEY = "6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIU8";
+const PREVIOUS_HOSTED_SITE_KEY = "6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIUS";
 
 export function hostedAIConfig(): AIConfig | undefined {
   if (
@@ -25,4 +26,19 @@ export function hostedAIConfig(): AIConfig | undefined {
     siteKey: HOSTED_SITE_KEY,
     model: DEFAULT_CLOUD_MODEL,
   };
+}
+
+export function upgradeHostedAIConfig(config?: AIConfig): AIConfig | undefined {
+  const current = hostedAIConfig();
+  if (
+    !config ||
+    !current ||
+    config.appCheckMode !== "enterprise" ||
+    config.siteKey !== PREVIOUS_HOSTED_SITE_KEY ||
+    config.firebase.projectId !== current.firebase.projectId ||
+    config.firebase.appId !== current.firebase.appId
+  )
+    return config;
+  // Earlier hosted libraries saved the public key in IndexedDB. Keep their other settings.
+  return { ...config, siteKey: current.siteKey };
 }

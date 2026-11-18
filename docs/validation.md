@@ -4,12 +4,12 @@ Checked on November 18, 2026, using Node 24 for the app, Node 22 for the email b
 
 | Check | Result |
 | --- | --- |
-| App unit tests | 47 passed across six files. |
+| App unit tests | 49 passed across six files, including updates to previously saved Firebase connections. |
 | Production build | TypeScript, the web build, extension, offline shell, and both download packages passed. |
 | Desktop, mobile, and extension browser checks | All 14 checks passed. |
 | Email backend build and policy tests | The build passed, and all three policy tests passed. |
 | Real local Firestore emulator | All eight delivery tests passed. The email transport was a test fixture. |
-| Real Firebase cloud request | Got past the earlier API-disabled error, then failed App Check with `401 UNAUTHENTICATED` after reCAPTCHA failed in automated Chromium. |
+| Real Firebase cloud request | App Check verified the browser, and `gemini-3.5-flash-lite` returned HTTP 200 with a cited comparison of four approved sample sources. |
 | Real on-device model availability | Chromium reported `unavailable`; Nano inference could not run on this server. |
 | Actual email delivery | Not attempted. No provider account or verified sender was configured. |
 
@@ -33,15 +33,15 @@ The frontend and backend also check the approved bookmark data format and time z
 
 ## Real AI setup
 
-A real request approved four labelled sample sources and 3,364 source bytes, then reached `firebasevertexai.googleapis.com` for `gemini-3.5-flash-lite`. The initial test reported that the AI Logic API was disabled or had not been used in project `941106573002`. After the project's setup changed, the cloud response became `401 UNAUTHENTICATED`: Firebase rejected its App Check token.
+A successful real request approved four labelled sample sources and 3,364 source bytes, then reached `firebasevertexai.googleapis.com` for `gemini-3.5-flash-lite`. The model returned HTTP 200, and Tab Brain displayed a comparison with eleven inline source citations. The answer described the tools as fictional examples, matching the supplied sample pages. This was real cloud generation using authored fixtures.
 
-A separate trace confirmed that reCAPTCHA Enterprise scripts and the verification iframe loaded. The Firebase SDK reported `appCheck/recaptcha-error` before a signed token could be issued, then its model request used an unsigned placeholder token. The trace recorded only the token's presence, length, and shape; it did not store the token. A headless-browser limitation and a site-key/domain setting remain possible causes. A normal-browser test is still required.
+Earlier attempts first encountered a disabled AI Logic API, then failed browser verification. A trace showed the native reCAPTCHA error, **Invalid site key or not loaded in api.js**. The owner supplied the existing key as hexadecimal text from Google Cloud Shell, which established that its last character was `8`, rather than the `S` previously copied into the app. Entering the corrected key in the real hosted interface allowed Firebase to verify the browser and the cloud comparison to succeed. The existing registration and enforcement were sufficient; no debug token was used.
 
-The app now checks App Check before invoking the cloud model, so a verification failure leaves the approved source text local. The **Verify connection** button checks browser verification separately. New unit checks cover failed verification, an unsigned placeholder token, checking the connection without either model, and the distinction between a local `LanguageModel` error and a disabled Firebase service.
+The app checks App Check before invoking the cloud model, so a verification failure leaves the approved source text local. The **Verify connection** button checks browser verification separately. Unit checks cover failed verification, an unsigned placeholder token, checking the connection without either model, and the distinction between a local `LanguageModel` error and a disabled Firebase service. Two storage checks confirm that updating an old saved site key preserves pages, notes, the chosen model, reminder settings, usage counters, and custom connections.
 
-Chromium exposed the `LanguageModel` API, but its actual availability check returned `unavailable`. Firebase's device-model initialization also failed. No successful cloud or on-device inference is claimed here. The live badge shows these failures, and model receipts are stored only after the SDK confirms a successful response's execution location.
+Chromium exposed the `LanguageModel` API, but its actual availability check returned `unavailable`. Firebase's device-model initialization also failed. Cloud inference succeeded; on-device inference remains unverified. The live badge reports the result of each operation, and model receipts are stored only after the SDK confirms a successful response's execution location.
 
-Unit tests that mock the Firebase SDK verify routing, source approval, failure handling, and storage. They do not establish a live model run. Follow [Firebase setup](firebase-setup.md) to activate the service and test both execution locations on a supported computer.
+Unit tests that mock the Firebase SDK verify routing, source approval, failure handling, and storage. They do not establish a live model run. The cloud result above came from the real service. Follow [Firebase setup](firebase-setup.md) to test local inference on a supported computer and repeat the full workflow there.
 
 ## Run the checks
 

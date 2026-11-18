@@ -4,13 +4,13 @@ The intended demonstration is a research session with 15 mixed tabs: capture the
 
 The interface, local storage, extraction, offline recall, notes, reminders, source preview, model badge, and distribution are implemented and tested. The [public repository](https://github.com/NSEVEjk0/tab-brain) contains the Apache-2.0 license, setup instructions, and automated checks. The optional email service is prepared but disabled until a provider and Firebase backend are configured.
 
-A real cloud request on November 18 got past its earlier API-disabled error but failed App Check because the automated browser could not complete reCAPTCHA. A normal browser must verify the connection and produce a real cloud answer. This server's Chromium reported Nano as unavailable, so a supported desktop computer must demonstrate the local inference step. Both successful execution locations still need evidence.
+A real cloud request on November 18 passed App Check and returned a cited Gemini comparison of four approved sample sources. Correcting one character in the public reCAPTCHA key resolved the earlier verification failure. This server's Chromium reported Nano as unavailable, so a supported desktop computer must still demonstrate the local inference step. The final demo needs to show both execution locations working in the same workflow.
 
 The rules audit from November 17 records a deadline of **November 30, 2026, at 22:00 UTC**. The official FAQ requires both local and cloud inference through Firebase AI Logic, and App Check is required. A Chrome extension is eligible; a working single platform is sufficient. The public source needs an open-source license, runtime Firebase calls, and setup instructions. The demo video must be public on YouTube and no longer than three minutes. Judging access must stay free through December 16.
 
 Before submitting:
 
-- Finish Firebase AI Logic activation, confirm App Check, and verify both real execution locations on a compatible computer. Keep the successful model receipts and a recording of the actual calls.
+- Verify actual Nano inference on a compatible computer, then repeat the working cloud comparison in the same session. Keep the successful model receipts and a recording of the actual calls.
 - Check that the public repository and free judging app remain accessible. The extension and complete source can also be downloaded from the app.
 - Record a real capture → declutter → offline recall → approved cloud comparison using owned or authorized source pages. Clearly identify any sample fixtures.
 - Record and upload a public English demo video of at most three minutes; do not show secrets or private data.

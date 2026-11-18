@@ -2,7 +2,7 @@
 
 The registered production website includes the supplied public configuration for project `tab-brain` and its reCAPTCHA Enterprise site key. It makes that connection available automatically on `https://tab-brain-memory.vercel.app`; saved custom connections and explicit disconnects take precedence. The owner completed App Check setup in Google Cloud Shell, keeping Google credentials off the build server.
 
-A later real test on November 18 got past the earlier API-disabled response, but the automated browser could not complete reCAPTCHA verification. Google served the reCAPTCHA scripts and iframe; the Firebase SDK reported `appCheck/recaptcha-error` before an App Check token was issued. The model gateway then rejected the SDK's unsigned placeholder token with `401 UNAUTHENTICATED`. This does not establish that a normal browser will fail for the same reason.
+A real test on November 18 verified the browser through App Check and received a successful, cited Gemini answer. The earlier `appCheck/recaptcha-error` came from an incorrectly transcribed public site key: the actual key ends in `IU8`, while the app had used `IUS`. Google Cloud Shell's hexadecimal output confirmed the exact characters. The corrected key worked with the existing Firebase registration and enforcement. The app also updates saved connections that contain that old key when the registered website reloads.
 
 The app now checks App Check explicitly before a model request. In the deployed website's **Settings & backups**, choose **Verify connection**. A successful check establishes browser verification; an approved source question still needs to establish actual Gemini inference. The Firebase console's **Add the SDK** hint is general setup guidance. Tab Brain already imports and uses the Firebase AI Logic SDK.
 
@@ -12,7 +12,7 @@ The initial test had returned `403 PERMISSION_DENIED` and `AI/api-not-enabled`, 
 
 The AI request gateway is `firebasevertexai.googleapis.com`. Firebase uses `firebaseml.googleapis.com` as the AI Logic App Check enforcement identifier. The different names refer to different setup steps. A public web API key cannot enable either service or change project permissions.
 
-This server's Chromium reported its on-device model as `unavailable`, so it could not generate a Nano summary. A supported desktop computer still needs to complete the local test. Both failures leave the saved library available.
+This server's Chromium reported its on-device model as `unavailable`, so it could not generate a Nano summary. A supported desktop computer still needs to complete the local test. If local AI is unavailable, the saved library and cloud comparison remain available.
 
 For the extension, a different host, or another Firebase project, follow the setup below. The extension prefills the public Web configuration, but its private App Check development token must be registered and entered by the owner.
 
@@ -27,7 +27,7 @@ For the extension, a different host, or another Firebase project, follow the set
 9. Disconnect the network and confirm source recall still works. Once the local model has downloaded, also verify local summarization offline on the target device.
 10. Reconnect, choose **Ask my tabs**, enter a source question, inspect the exact snippets, and click **Approve & send to Gemini**. The badge should name the requested cloud model while it works. A successful answer must identify cloud execution and include valid source-number citations. Check App Check enforcement and Firebase usage in the console.
 
-The hosted build and the extension have different origins. Configure the extension separately and move source records with a backup if needed. Keep App Check development tokens, Google access tokens, and service-account private keys out of public source, screenshots, test instructions, and video. Firebase Web configuration and reCAPTCHA Enterprise site keys are public client identifiers. A configured interface still needs actual local and cloud model verification.
+The hosted build and the extension have different origins. Configure the extension separately and move source records with a backup if needed. Keep App Check development tokens, Google access tokens, and service-account private keys out of public source, screenshots, test instructions, and video. Firebase Web configuration and reCAPTCHA Enterprise site keys are public client identifiers. Cloud inference has been verified on the hosted website; actual local inference still needs a supported computer.
 
 Official references:
 

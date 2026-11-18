@@ -128,6 +128,63 @@ describe("local transaction boundaries", () => {
     });
     expect((await db.snapshot()).settings.ai).toEqual(custom);
   });
+  it("persists the corrected production key without losing saved pages or personal settings", async () => {
+    vi.stubGlobal("location", new URL("https://tab-brain-memory.vercel.app"));
+    const current = (
+      await import("../../src/firebaseConfig")
+    ).hostedAIConfig()!;
+    await db.putMemories([memory({ notes: "Keep my reading note." })]);
+    await db.putSettings({
+      initialized: true,
+      cloudBytes: 3364,
+      cloudRequests: 1,
+      reminderNotifications: true,
+      ai: {
+        ...current,
+        siteKey: "6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIUS",
+        model: "gemini-2.5-flash",
+      },
+    });
+    await db.initializeLibrary([], []);
+    vi.resetModules();
+    db = await import("../../src/db");
+    // Another origin has no managed default, so this also checks the persisted value.
+    vi.stubGlobal("location", new URL("https://another-site.example"));
+    const state = await db.snapshot();
+    expect(state.settings.ai?.siteKey).toBe(
+      "6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIU8",
+    );
+    expect(state.settings.ai?.model).toBe("gemini-2.5-flash");
+    expect(state.settings.cloudBytes).toBe(3364);
+    expect(state.settings.cloudRequests).toBe(1);
+    expect(state.settings.reminderNotifications).toBe(true);
+    expect(state.memories[0].notes).toBe("Keep my reading note.");
+  });
+  it("uses the corrected key through later settings and ledger writes while preserving custom keys", async () => {
+    vi.stubGlobal("location", new URL("https://tab-brain-memory.vercel.app"));
+    const current = (
+      await import("../../src/firebaseConfig")
+    ).hostedAIConfig()!;
+    await db.putSettings({
+      initialized: true,
+      cloudBytes: 0,
+      cloudRequests: 0,
+      ai: { ...current, siteKey: "6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIUS" },
+    });
+    await db.updateSettings({ reminderNotifications: true });
+    const ledger = await db.recordCloudAttempt(100, 1);
+    expect(ledger.ai?.siteKey).toBe(current.siteKey);
+    await db.putSettings({
+      initialized: true,
+      cloudBytes: 0,
+      cloudRequests: 0,
+      ai: { ...current, siteKey: "TEST_NOT_A_REAL_CUSTOM_KEY" },
+    });
+    await db.initializeLibrary([], []);
+    expect((await db.snapshot()).settings.ai?.siteKey).toBe(
+      "TEST_NOT_A_REAL_CUSTOM_KEY",
+    );
+  });
   it("keeps an explicit disconnect through later settings writes and a reload", async () => {
     vi.stubGlobal("location", new URL("https://tab-brain-memory.vercel.app"));
     await db.initializeLibrary([], []);
