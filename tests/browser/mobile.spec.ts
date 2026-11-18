@@ -21,7 +21,7 @@ test("the mobile workspace, navigation, capture and source review fit a narrow s
   await expect(
     page.locator(".topbar").getByTestId("live-model-badge"),
   ).toBeVisible();
-  await page.getByRole("button", { name: /^Snap all open tabs/ }).click();
+  await page.getByRole("button", { name: /^Save a page/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(
     await page.evaluate(

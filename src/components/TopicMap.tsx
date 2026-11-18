@@ -44,8 +44,8 @@ export function TopicMap({
     <div className={`topic-map ${compact ? "compact-map" : ""}`}>
       <svg
         viewBox={compact ? "0 0 290 310" : "0 0 620 550"}
-        role="img"
-        aria-label="Topic connections in your saved library"
+        role="group"
+        aria-label="Topics in your saved library"
       >
         <defs>
           <pattern
@@ -62,15 +62,6 @@ export function TopicMap({
           height="100%"
           fill={`url(#${compact ? "compactDots" : "mapDots"})`}
         />
-        {topics.slice(1).map(([tag], index) => (
-          <path
-            key={tag}
-            d={`M${positions[0][0]},${positions[0][1]} Q${(positions[0][0] + positions[index + 1][0]) / 2 + 30},${(positions[0][1] + positions[index + 1][1]) / 2} ${positions[index + 1][0]},${positions[index + 1][1]}`}
-            stroke="#aabf97"
-            strokeWidth="1.2"
-            fill="none"
-          />
-        ))}
         {topics.map(([tag, count], index) => (
           <g
             key={tag}
@@ -120,8 +111,8 @@ export function TopicMap({
       )}
       {!compact && (
         <p className="map-caption">
-          <span className="tiny-dot" /> Topics connect through the pages you’ve
-          saved. Click one to explore. <ArrowUpRight size={14} />
+          <span className="tiny-dot" /> Your most-used topics. Click one to see
+          its saved pages. <ArrowUpRight size={14} />
         </p>
       )}
     </div>

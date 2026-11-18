@@ -52,7 +52,7 @@ test("a real pasted capture is saved, searchable, editable, and safe to render",
 }) => {
   await page.goto("/");
   await expect(page.locator(".memory-card")).toHaveCount(15);
-  await page.getByRole("button", { name: /^Snap all open tabs/ }).click();
+  await page.getByRole("button", { name: /^Save a page/ }).click();
   const capture = page.getByRole("dialog");
   await capture.getByLabel("Page title").fill("My private browser notebook");
   await capture
@@ -276,7 +276,7 @@ test("personal notes, reminders, calendar export, and reading status survive rel
 }) => {
   await page.clock.install({ time: new Date("2026-11-20T10:00:00.000Z") });
   await page.goto("/");
-  await page.getByRole("button", { name: /^Snap all open tabs/ }).click();
+  await page.getByRole("button", { name: /^Save a page/ }).click();
   const capture = page.getByRole("dialog");
   await capture.getByLabel("Page title").fill("A page for tomorrow");
   await capture
@@ -364,7 +364,7 @@ test("email briefs can be previewed and downloaded offline without sharing notes
       external.push(request.url());
   });
   await page.goto("/");
-  await page.getByRole("button", { name: /^Snap all open tabs/ }).click();
+  await page.getByRole("button", { name: /^Save a page/ }).click();
   const capture = page.getByRole("dialog");
   await capture.getByLabel("Page title").fill("My reading brief page");
   await capture
@@ -541,7 +541,7 @@ test("denied browser storage produces a clear failure and no false save receipt"
   await page.goto("/");
   await expect(page.getByText("We couldn’t open local storage.")).toBeVisible();
   await expect(page.locator(".memory-card")).toHaveCount(0);
-  await page.getByRole("button", { name: /^Snap all open tabs/ }).click();
+  await page.getByRole("button", { name: /^Save a page/ }).click();
   const capture = page.getByRole("dialog");
   await capture.getByLabel("Page title").fill("Denied save");
   await capture

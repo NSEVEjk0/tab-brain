@@ -710,17 +710,27 @@ export default function App() {
                       everything you <em>find.</em>
                     </h1>
                     <p>
-                      Save the good stuff. Close the tabs.
-                      <br className="narrow-break" /> Come back when you’re
-                      ready.
+                      {isExtension ? (
+                        <>
+                          Save the pages you need. Close the saved tabs.
+                          <br className="narrow-break" /> Find the useful part
+                          again.
+                        </>
+                      ) : (
+                        <>
+                          Save page text and your own notes.
+                          <br className="narrow-break" /> Find them again, even
+                          offline.
+                        </>
+                      )}
                     </p>
                     <div className="hero-actions">
                       <button
                         className="button dark"
                         onClick={() => setCapture({ scope: "all" })}
                       >
-                        <Layers size={16} />
-                        Snap all open tabs
+                        {isExtension ? <Layers size={16} /> : <Plus size={16} />}
+                        {isExtension ? "Snap all open tabs" : "Save a page"}
                         <span className="button-shortcut">↗</span>
                       </button>
                       <button
