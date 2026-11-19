@@ -1,0 +1,14 @@
+.git/
+.local/
+.vercel/
+node_modules/
+dist/
+extension-dist/
+reports/
+test-results/
+playwright-report/
+.firebase/
+.env*
+!.env.example
+*.log
+*.tsbuildinfo
