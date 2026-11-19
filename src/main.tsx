@@ -7,6 +7,7 @@ import "@fontsource/dm-sans/latin-700.css";
 import "@fontsource/instrument-serif/latin-400.css";
 import "@fontsource/instrument-serif/latin-400-italic.css";
 import "./styles.css";
+import "./theme.css";
 import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

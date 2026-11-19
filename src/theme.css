@@ -1,0 +1,700 @@
+:root {
+  color-scheme: light;
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.theme-toggle:hover {
+  background: var(--line);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #e7ecdf;
+  background: #141c17;
+  --ink: #e7ecdf;
+  --muted: #acb7a2;
+  --line: #344337;
+  --paper: #1e2821;
+  --green: #c5f48a;
+  --surface-soft: #253226;
+  --surface-active: #35482e;
+  --accent: #c2dca2;
+  --on-accent: #1c2916;
+  --faint: #99a98f;
+  --amber-surface: #382f21;
+  --amber-line: #68563b;
+  --amber-text: #e2c796;
+  --purple-surface: #302837;
+  --purple-line: #554363;
+  --purple-text: #d0bde6;
+  --danger-surface: #3a2823;
+  --danger-line: #70483a;
+  --danger-text: #edbaaa;
+}
+
+:root[data-theme="dark"] ::selection {
+  background: #51673e;
+  color: #f4f8ed;
+}
+
+:root[data-theme="dark"] :is(input, textarea, select) {
+  background: var(--paper);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: var(--faint);
+}
+
+:root[data-theme="dark"] :is(input, textarea):focus {
+  border-color: #91b36e;
+  box-shadow: 0 0 0 3px #91b36e25;
+}
+
+:root[data-theme="dark"] input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .topbar,
+    .top-install,
+    .welcome-banner,
+    .view-controls,
+    .library-search,
+    .library-search kbd,
+    .sample-banner,
+    .memory-card,
+    .card-foot,
+    .card-menu,
+    .selection-toolbar,
+    .library-empty,
+    .connections-card,
+    .full-topic-card,
+    .activity-symbol,
+    .aside-quote,
+    .workspace-footer,
+    .modal,
+    .modal-head > .icon-button,
+    .toast,
+    .settings-panel,
+    .title-stamp,
+    .setting-icon.green,
+    .setup-note,
+    .detail-excerpts blockquote,
+    .review-snippets blockquote,
+    .original-text,
+    .detail-aside,
+    .detail-management,
+    .install-illustration,
+    .install-browser,
+    .install-steps li > span,
+    .install-foot,
+    .install-foot kbd,
+    .capture-extension-note,
+    .capture-footer,
+    .tab-picker-list,
+    .capture-progress,
+    .capture-check,
+    .ask-welcome,
+    .ask-brand,
+    .question-suggestions button,
+    .ask-composer,
+    .selected-sources-note,
+    .ask-aside,
+    .trust-step > span,
+    .ask-privacy,
+    .answer-card,
+    .answer-heading,
+    .answer-sources,
+    .answer-sources button > span,
+    .inline-citation,
+    .cloud-review-question,
+    .review-source,
+    .payload-details,
+    .review-footer,
+    .live-model-badge,
+    .model-receipt,
+    .hybrid-flow,
+    .hybrid-flow > div > span,
+    .reminder-panel,
+    .reminder-shortcuts .button,
+    .return-stamp,
+    .notification-panel,
+    .return-card,
+    .return-empty,
+    .email-account,
+    .email-bookmark-list,
+    .email-bookmark-list > label,
+    .email-empty,
+    .email-preview,
+    .email-preview iframe,
+    .saved-email-plan
+  ) {
+  border-color: var(--line);
+}
+
+:root[data-theme="dark"]
+  :is(
+    small,
+    details summary::before,
+    .icon-button,
+    .text-link.muted,
+    .eyebrow,
+    .breadcrumb,
+    .breadcrumb > svg,
+    .connection-indicator,
+    .model-indicator,
+    .hero-eyebrow,
+    .welcome-banner p,
+    .hero-art-caption,
+    .memory-stats,
+    .memory-stats > span > svg,
+    .stats-export,
+    .tooltip,
+    .section-heading p,
+    .view-controls button,
+    .library-search,
+    .library-search kbd,
+    .sort-select > svg,
+    .sample-banner,
+    .active-filter,
+    .card-domain,
+    .card-summary,
+    .card-foot,
+    .card-foot .icon-button,
+    .library-footer,
+    .library-page-title p,
+    .library-empty p,
+    .aside-heading,
+    .connections-card > p,
+    .map-empty,
+    .map-caption,
+    .activity-item p,
+    .activity-item small,
+    .fresh-activity p,
+    .aside-quote p,
+    .aside-quote i,
+    .workspace-footer,
+    .workspace-footer > span:first-child,
+    .modal-intro,
+    .modal-intro + p,
+    .collection-form > p,
+    .initial-loading,
+    .page-title-row p,
+    .title-stamp,
+    .panel-heading p,
+    .setup-note,
+    .setup-guide ol,
+    .settings-form label,
+    .settings-pair p,
+    .settings-pair small,
+    .sample-settings p,
+    .settings-footer,
+    .detail-source,
+    .detail-excerpts h3,
+    .detail-excerpts blockquote,
+    .review-snippets blockquote,
+    .original-text > p,
+    .original-text summary > span,
+    .detail-aside label,
+    .detail-aside small,
+    .field-label,
+    .install-intro,
+    .install-steps p,
+    .install-foot,
+    .capture-extension-note,
+    .capture-form label,
+    .capture-options > label:first-child,
+    .local-capture-option small,
+    .disabled-option strong,
+    .capture-footer > span,
+    .tab-picker-head,
+    .tab-picker-list small,
+    .loading-line,
+    .empty-inline,
+    .capture-progress,
+    .capture-hint,
+    .capture-finished > p,
+    .ask-welcome > p,
+    .question-suggestions button,
+    .composer-foot > span,
+    .selected-sources-note,
+    .trust-step p,
+    .ask-privacy,
+    .section-small-heading > span,
+    .answer-heading,
+    .answer-card > small,
+    .cloud-review-question,
+    .cloud-review-question span,
+    .review-summary,
+    .review-source small,
+    .review-snippets > p,
+    .review-snippets > p > b,
+    .review-snippets summary,
+    .source-url,
+    .payload-details summary,
+    .payload-details pre,
+    .hybrid-flow p,
+    .card-reading-status,
+    .reminder-panel > p,
+    .reminder-panel .reminder-note,
+    .notification-panel p,
+    .return-section h2 > span,
+    .return-section small,
+    .return-source,
+    .return-card > p,
+    .return-empty,
+    .email-intro,
+    .email-account p,
+    .email-preferences label,
+    .email-bookmark-head,
+    .email-bookmark-list small,
+    .email-empty,
+    .email-limit,
+    .email-preview .section-small-heading > span,
+    .email-consent,
+    .saved-email-plan p
+  ) {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .breadcrumb strong,
+    .welcome-banner h1,
+    .memory-stats strong,
+    .card-title,
+    .modal-head h2,
+    .page-title-row h1,
+    .panel-heading h2,
+    .settings-pair h2,
+    .sample-settings h2,
+    .detail-summary p,
+    .install-steps strong,
+    .local-capture-option strong,
+    .tab-picker-list strong,
+    .capture-finished h3,
+    .ask-welcome h2,
+    .ask-aside > h3,
+    .trust-step strong,
+    .section-small-heading h2,
+    .answer-card h3,
+    .answer-prose,
+    .cloud-review-question strong,
+    .review-source strong,
+    .hybrid-flow strong,
+    .reminder-panel h3,
+    .notification-panel strong,
+    .return-section h2,
+    .return-title,
+    .email-account strong,
+    .email-bookmark-list strong,
+    .email-preview h3,
+    .saved-email-plan strong
+  ) {
+  color: var(--ink);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .text-link,
+    .text-link:hover,
+    .tiny-star,
+    .hero-ask,
+    .sample-banner button,
+    .active-filter strong,
+    .analysis-badge.real-ai,
+    .card-foot .favorite-button.active,
+    .favorite-button:hover,
+    .selection-toolbar > span,
+    .library-empty > div,
+    .connections-card h3,
+    .activity-item strong,
+    .fresh-activity strong,
+    .fresh-activity > span,
+    .aside-quote > span,
+    .toast p,
+    .setting-icon.green,
+    .setup-guide summary,
+    .setup-guide a,
+    .detail-summary .eyebrow,
+    .original-text summary,
+    .capture-extension-note strong,
+    .capture-check,
+    .ask-brand,
+    .answer-sources button,
+    .hybrid-flow > div > span,
+    .return-stamp
+  ) {
+  color: var(--accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .topbar,
+    .memory-card,
+    .card-menu,
+    .modal,
+    .toast,
+    .settings-panel,
+    .question-suggestions button,
+    .ask-composer,
+    .answer-card,
+    .review-source,
+    .notification-panel,
+    .return-card
+  ) {
+  background: var(--paper);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .top-install,
+    .welcome-banner,
+    .section-heading h2 > span,
+    .view-controls,
+    .library-search,
+    .library-search kbd,
+    .sample-banner,
+    .active-filter,
+    .card-tags button,
+    .selection-toolbar,
+    .library-empty,
+    .connections-card,
+    .full-topic-card,
+    .activity-symbol,
+    .workspace-footer,
+    .modal-head > .icon-button,
+    .toast > span,
+    .title-stamp,
+    .setting-icon.green,
+    .setup-note,
+    .sample-settings,
+    .detail-excerpts blockquote,
+    .review-snippets blockquote,
+    .button.favorited,
+    .install-illustration,
+    .install-browser,
+    .install-steps li > span,
+    .install-foot kbd,
+    .capture-extension-note,
+    .tab-picker-list > label,
+    .capture-progress,
+    .capture-check,
+    .ask-welcome,
+    .ask-brand,
+    .selected-sources-note,
+    .ask-aside,
+    .trust-step > span,
+    .inline-citation,
+    .answer-sources button > span,
+    .cloud-review-question,
+    .excluded-source,
+    .payload-details,
+    .live-model-badge,
+    .model-receipt,
+    .hybrid-flow > div,
+    .reminder-shortcuts .button,
+    .return-stamp,
+    .return-card.is-due,
+    .return-empty,
+    .email-account,
+    .email-empty,
+    .saved-email-plan
+  ) {
+  background: var(--surface-soft);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .top-install,
+    .section-heading h2 > span,
+    .card-tags button,
+    .activity-symbol,
+    .toast > span,
+    .button.favorited,
+    .install-steps li > span,
+    .inline-citation,
+    .live-model-badge,
+    .model-receipt
+  ) {
+  color: var(--accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .view-controls button.active,
+    .view-controls button:hover,
+    .card-tags button:hover,
+    .card-menu button:hover,
+    .selection-toolbar button:hover,
+    .tab-picker-list > label:hover,
+    .question-suggestions button:hover,
+    .inline-citation:hover,
+    .hybrid-flow > div.flow-active
+  ) {
+  background: var(--surface-active);
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .button.dark {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+:root[data-theme="dark"] .button.dark:hover:not(:disabled) {
+  background: #d6eab8;
+  border-color: #d6eab8;
+}
+
+:root[data-theme="dark"] :is(.button.secondary, .button.ghost) {
+  background: var(--surface-soft);
+  border-color: var(--line);
+  color: var(--accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .button.secondary:hover:not(:disabled),
+    .button.ghost:hover:not(:disabled),
+    .icon-button:hover
+  ) {
+  background: var(--surface-active);
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .button-shortcut {
+  color: var(--on-accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .library-search:focus-within,
+    .ask-composer:focus-within,
+    .memory-card.is-selected
+  ) {
+  border-color: #94b76f;
+  box-shadow: 0 0 0 3px #a8cc8125;
+}
+
+:root[data-theme="dark"] .memory-card:hover {
+  border-color: #6e8b53;
+  box-shadow: 0 5px 20px #060c0930;
+}
+
+:root[data-theme="dark"] .sidebar {
+  background: #18221c;
+  border-right-color: var(--line);
+}
+
+:root[data-theme="dark"] .workspace-avatar {
+  background: #43523a;
+  color: #e3efce;
+}
+
+:root[data-theme="dark"] .source-glyph {
+  background: var(--surface-active);
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .card-select {
+  background: var(--paper);
+  border-color: #6b8555;
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .card-select.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+:root[data-theme="dark"] .workspace-footer svg {
+  --brand-hole: var(--surface-soft);
+}
+
+:root[data-theme="dark"] .initial-loading svg:first-child {
+  --brand-hole: #141c17;
+}
+
+:root[data-theme="dark"] .ask-brand {
+  --brand-hole: var(--surface-soft);
+}
+
+:root[data-theme="dark"] .modal-backdrop {
+  background: #070e0bc2;
+}
+
+:root[data-theme="dark"] :is(.modal, .card-menu, .toast) {
+  box-shadow: 0 18px 65px #0006;
+}
+
+:root[data-theme="dark"] .memory-cover {
+  background: #2d3b2b;
+  color: #bbcea9;
+}
+
+:root[data-theme="dark"] .color-mint {
+  background: #30452c;
+  color: #bdd7a8;
+}
+
+:root[data-theme="dark"] .color-lavender {
+  background: #3b3046;
+  color: #cdb9dd;
+}
+
+:root[data-theme="dark"] .color-sand {
+  background: #423b2b;
+  color: #d7c39a;
+}
+
+:root[data-theme="dark"] .color-sky {
+  background: #2b3c45;
+  color: #b4d2de;
+}
+
+:root[data-theme="dark"] .color-peach {
+  background: #46382c;
+  color: #e2bea0;
+}
+
+:root[data-theme="dark"] .color-rose {
+  background: #453131;
+  color: #deb9b2;
+}
+
+:root[data-theme="dark"] :is(.cover-code, .cover-browser) {
+  background: #14201b90;
+  border-color: #a2bca055;
+  box-shadow: 4px 5px 0 #070e0b25;
+}
+
+:root[data-theme="dark"]
+  :is(
+    .cover-code code,
+    .cover-code code > span,
+    .cover-code code em,
+    .cover-code code b,
+    .cover-code code small,
+    .window-dots span
+  ) {
+  color: #bbcec2;
+}
+
+:root[data-theme="dark"] .topic-map rect + .topic-node > circle,
+:root[data-theme="dark"] .topic-node > circle {
+  stroke: var(--paper);
+}
+
+:root[data-theme="dark"] .topic-map pattern circle {
+  fill: #42543b;
+}
+
+:root[data-theme="dark"]
+  :is(
+    .status-pill,
+    .capture-failures,
+    .answer-unknowns,
+    .review-connect,
+    .live-model-badge.model-review,
+    .model-receipt.model-review,
+    .email-panel .email-setup-note
+  ) {
+  background: var(--amber-surface);
+  border-color: var(--amber-line);
+  color: var(--amber-text);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .answer-unknowns strong,
+    .answer-unknowns p,
+    .review-connect .text-link,
+    .connection-indicator.offline,
+    .delete-confirm > p
+  ) {
+  color: var(--amber-text);
+}
+
+:root[data-theme="dark"] :is(.status-pill.configured, .inline-success) {
+  background: var(--surface-active);
+  border-color: #526b40;
+  color: var(--accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .setting-icon,
+    .activity-cloud,
+    .live-model-badge.model-cloud,
+    .model-receipt.model-cloud
+  ) {
+  background: var(--purple-surface);
+  border-color: var(--purple-line);
+  color: var(--purple-text);
+}
+
+:root[data-theme="dark"] .setting-icon.green {
+  background: var(--surface-soft);
+  border-color: var(--line);
+  color: var(--accent);
+}
+
+:root[data-theme="dark"]
+  :is(
+    .button.danger,
+    .inline-error,
+    .fatal-error,
+    .error-toast > span,
+    .live-model-badge.model-error,
+    .model-receipt.model-error
+  ) {
+  background: var(--danger-surface);
+  border-color: var(--danger-line);
+  color: var(--danger-text);
+}
+
+:root[data-theme="dark"] .error-toast {
+  border-color: var(--danger-line);
+}
+
+:root[data-theme="dark"] :is(.danger-text, .error-toast p) {
+  color: var(--danger-text);
+}
+
+:root[data-theme="dark"] .hybrid-flow {
+  background: var(--line);
+}
+
+:root[data-theme="dark"] progress,
+:root[data-theme="dark"] progress::-webkit-progress-bar {
+  background: var(--line);
+}
+
+:root[data-theme="dark"] progress::-webkit-progress-value {
+  background: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .topbar-actions {
+    gap: 8px;
+  }
+
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
+  }
+}

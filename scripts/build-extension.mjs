@@ -19,6 +19,7 @@ await fs.copyFile(
 );
 for (const filename of [
   "favicon.svg",
+  "theme.js",
   "icon-16.png",
   "icon-48.png",
   "icon-128.png",

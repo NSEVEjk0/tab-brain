@@ -39,6 +39,7 @@ import { AskView } from "./components/AskView";
 import { SettingsView } from "./components/SettingsView";
 import { ModelBadge } from "./components/ModelBadge";
 import { ReturnView } from "./components/ReturnView";
+import { ThemeToggle } from "./components/ThemeToggle";
 import {
   requestReminderPermission,
   returnQueue,
@@ -615,6 +616,7 @@ export default function App() {
             </strong>
           </div>
           <div className="topbar-actions">
+            <ThemeToggle />
             <span className={`connection-indicator ${online ? "" : "offline"}`}>
               {online ? <span className="tiny-dot" /> : <WifiOff size={12} />}{" "}
               {online ? "Local workspace" : "You’re offline"}

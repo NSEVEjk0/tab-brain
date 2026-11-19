@@ -20,6 +20,7 @@ The useful detail stays with its context: the source, the capture date, your not
 
 ## What you get
 
+- **Read in dark or light.** Use the sun/moon button in the top bar to switch the whole workspace, including saved text and dialogs. Dark is the default, and this browser remembers your choice.
 - **Save the text you want to return to.** The Chrome extension captures readable pages from the tabs you choose. On the website, **Save a page** lets you paste the title, link, and text.
 - **Find a page by its useful detail.** Search across titles, saved text, excerpts, tags, and your own notes. You can look for a remembered phrase without first remembering the page's title.
 - **Keep your reading available offline.** Your saved library lives on your device. Read captured text, search, edit notes, and organize pages while you are offline.
