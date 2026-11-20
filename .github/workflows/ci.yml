@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      verify_cloud:
+        description: Also verify an approved production cloud comparison in the same browser
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -59,6 +64,7 @@ jobs:
         env:
           TAB_BRAIN_REAL_NANO: "1"
           TAB_BRAIN_GOOGLE_CHROME_PATH: /usr/bin/google-chrome
+          TAB_BRAIN_VERIFY_CLOUD: ${{ inputs.verify_cloud && '1' || '0' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

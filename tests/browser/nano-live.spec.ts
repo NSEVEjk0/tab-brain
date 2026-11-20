@@ -60,6 +60,10 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     },
   });
   const page = await context.newPage();
+  const verifyCloud = process.env.TAB_BRAIN_VERIFY_CLOUD === "1";
+  const origin = verifyCloud
+    ? "https://tab-brain-memory.vercel.app"
+    : "http://127.0.0.1:4173";
   const cloudRequests: string[] = [];
   page.on("request", (request) => {
     if (
@@ -70,13 +74,31 @@ test("official Chrome produces a real Firebase device summary and recalls its or
       cloudRequests.push(request.method());
   });
   try {
-    await page.goto("http://127.0.0.1:4173/#settings");
+    await page.goto(`${origin}/#settings`);
     await page
       .getByLabel("reCAPTCHA Enterprise site key")
       .fill("6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIU8");
     await page
       .getByRole("button", { name: "Save connection", exact: true })
       .click();
+    if (verifyCloud) {
+      await page
+        .getByRole("button", { name: "Verify connection", exact: true })
+        .click();
+      const verified = page.getByText(
+        "Firebase verified this browser. You can now approve a cloud question to test the model.",
+        { exact: true },
+      );
+      await verified.or(page.getByRole("alert")).waitFor({ timeout: 60_000 });
+      report.browserVerification = {
+        success: (await verified.count()) > 0,
+        errors: await page.getByRole("alert").allTextContents(),
+      };
+      expect(
+        await verified.count(),
+        JSON.stringify(report.browserVerification),
+      ).toBe(1);
+    }
     await page
       .getByRole("button", { name: "Enable on-device AI", exact: true })
       .click();
@@ -147,6 +169,33 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     expect(cloudRequests).toHaveLength(0);
     report.cloudGenerationRequests = cloudRequests;
     report.offlineRecall = true;
+    if (verifyCloud) {
+      await context.setOffline(false);
+      await page.locator(".ask-nav").click();
+      await page
+        .getByRole("button", { name: "Compare my research tools", exact: true })
+        .click();
+      await expect(page.locator(".review-source")).toHaveCount(4);
+      expect(cloudRequests).toHaveLength(0);
+      await page
+        .getByRole("button", { name: "Approve & send to Gemini", exact: true })
+        .click();
+      const answer = page.locator(".answer-card").first();
+      await answer.or(page.getByRole("alert")).waitFor({ timeout: 90_000 });
+      expect(
+        await answer.count(),
+        JSON.stringify(await page.getByRole("alert").allTextContents()),
+      ).toBe(1);
+      const citations = await answer.locator(".inline-citation").count();
+      expect(citations).toBeGreaterThan(0);
+      report.cloud = {
+        success: true,
+        approvedAuthoredSources: 4,
+        citations,
+        answer: await answer.innerText(),
+      };
+      report.cloudGenerationRequests = cloudRequests;
+    }
     report.passed = true;
   } finally {
     await page
