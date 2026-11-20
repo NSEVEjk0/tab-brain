@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-11-20T19:41:25.493Z",
+  "browser": "Google Chrome 157.0.8103.50",
+  "input": "authored test page; no personal data",
+  "cloudGenerationRequests": [],
+  "memory": [
+    "MemTotal:       16365628 kB",
+    "MemAvailable:   14858252 kB"
+  ],
+  "initialization": {
+    "ready": true,
+    "errors": []
+  },
+  "savedResult": {
+    "summary": "Offline research is possible with this reading library, which preserves original text and allows for note-taking and collection organization. Searched snippets from approved cloud comparisons are available.",
+    "tags": [
+      "offline access",
+      "reading library",
+      "searchable content"
+    ],
+    "modelEvidence": {
+      "name": "Gemini Nano",
+      "inferenceSource": "on-device",
+      "verifiedAt": "2026-11-20T19:43:19.145Z"
+    },
+    "originalTextRetained": true
+  },
+  "offlineRecall": true,
+  "passed": true
+}
