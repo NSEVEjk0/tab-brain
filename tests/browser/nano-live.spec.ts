@@ -39,11 +39,13 @@ test("official Chrome produces a real Firebase device summary and recalls its or
         (line) =>
           line.startsWith("MemTotal:") || line.startsWith("MemAvailable:"),
       );
+  const verifyCloud = process.env.TAB_BRAIN_VERIFY_CLOUD === "1";
   const context = await chromium.launchPersistentContext(profile, {
     executablePath: executable,
+    headless: !verifyCloud,
     ignoreDefaultArgs: true,
     args: [
-      "--headless=new",
+      ...(verifyCloud ? [] : ["--headless=new"]),
       "--no-sandbox",
       "--disable-dev-shm-usage",
       "--no-first-run",
@@ -60,7 +62,6 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     },
   });
   const page = await context.newPage();
-  const verifyCloud = process.env.TAB_BRAIN_VERIFY_CLOUD === "1";
   const origin = verifyCloud
     ? "https://tab-brain-memory.vercel.app"
     : "http://127.0.0.1:4173";

@@ -60,7 +60,7 @@ jobs:
       - run: npm run build
       - run: google-chrome --version
       - run: npx playwright install ffmpeg
-      - run: npm run test:e2e -- --config=playwright.nano.config.ts
+      - run: xvfb-run -a npm run test:e2e -- --config=playwright.nano.config.ts
         env:
           TAB_BRAIN_REAL_NANO: "1"
           TAB_BRAIN_GOOGLE_CHROME_PATH: /usr/bin/google-chrome
