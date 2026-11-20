@@ -1,17 +1,17 @@
 # What we checked
 
-Checked on November 18, 2026, using Node 24 for the app, Node 22 for the email backend, and real Chromium for browser checks. The public app is at https://tab-brain-memory.vercel.app.
+Updated on November 20, 2026, using Node 24 for the app, Node 22 for the email backend, Chromium for interface checks, and official Google Chrome 158 for the current real-model probe. The public app is at https://tab-brain-memory.vercel.app. Historical service results retain their original dates below.
 
-| Check | Result |
-| --- | --- |
-| App unit tests | 49 passed across six files, including updates to previously saved Firebase connections. |
-| Production build | TypeScript, the web build, extension, offline shell, and both download packages passed. |
-| Desktop, mobile, and extension browser checks | All 14 checks passed. |
-| Email backend build and policy tests | The build passed, and all three policy tests passed. |
-| Real local Firestore emulator | All eight delivery tests passed. The email transport was a test fixture. |
-| Real Firebase cloud request | App Check verified the browser, and `gemini-3.5-flash-lite` returned HTTP 200 with a cited comparison of four approved sample sources. |
-| Real on-device model availability | Chromium reported `unavailable`; Nano inference could not run on this server. |
-| Actual email delivery | Not attempted. No provider account or verified sender was configured. |
+| Check                                         | Result                                                                                                                                                                                                                                                                      |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App unit tests                                | 53 passed across six files, including saved-connection updates, local readiness, and connection changes during pending operations.                                                                                                                                          |
+| Production build                              | TypeScript, the web build, extension, offline shell, and both download packages passed.                                                                                                                                                                                     |
+| Desktop, mobile, and extension browser checks | All 14 checks passed. A separate check confirmed that unavailable local AI leaves captured text searchable after reload and never applies an AI receipt.                                                                                                                    |
+| Email backend build and policy tests          | The build passed, and all three policy tests passed.                                                                                                                                                                                                                        |
+| Real local Firestore emulator                 | All eight delivery tests passed on November 18. The email transport was a test fixture.                                                                                                                                                                                     |
+| Real Firebase cloud request                   | On November 18, App Check verified the browser and `gemini-3.5-flash-lite` returned HTTP 200 with a cited comparison of four approved sample sources. The November 20 automated browser was rejected by App Check before any generation request.                            |
+| Real on-device model availability             | Initial automated Chrome profiles reported `unavailable`. With component updates enabled, official Chrome offered a download, but initialization did not complete on this VPS. Genuine inference remains unverified; the optional CI check uses the standard public runner. |
+| Actual email delivery                         | Not attempted. No provider account or verified sender was configured.                                                                                                                                                                                                       |
 
 ## Browser behaviour
 
@@ -39,9 +39,17 @@ Earlier attempts first encountered a disabled AI Logic API, then failed browser 
 
 The app checks App Check before invoking the cloud model, so a verification failure leaves the approved source text local. The **Verify connection** button checks browser verification separately. Unit checks cover failed verification, an unsigned placeholder token, checking the connection without either model, and the distinction between a local `LanguageModel` error and a disabled Firebase service. Two storage checks confirm that updating an old saved site key preserves pages, notes, the chosen model, reminder settings, usage counters, and custom connections.
 
-Chromium exposed the `LanguageModel` API, but its actual availability check returned `unavailable`. Firebase's device-model initialization also failed. Cloud inference succeeded; on-device inference remains unverified. The live badge reports the result of each operation, and model receipts are stored only after the SDK confirms a successful response's execution location.
+The newer Chromium test build exposed `LanguageModel`, returned `downloadable`, and completed Firebase's initialization call. Its actual prompt output explicitly said that an on-device model was unavailable in Chromium and echoed the input. That was no model inference. Initial official Google Chrome 158 profiles also reported `unavailable`. A separate profile with normal component updates enabled offered a download, but did not finish initialization within twelve minutes. No successful local summary was claimed. The server has 6 GB RAM; Google's documented CPU requirements are at least 16 GB RAM and four cores, with at least 22 GB free profile storage. A GPU path requires more than 4 GB VRAM. See [Chrome's current hardware requirements](https://developer.chrome.com/docs/ai/get-started).
+
+The app now checks a short built-in sample through the device-only Firebase model before reporting local AI ready. A JSON response constraint requests the summary structure, and the result must still contain two sentences, three tags, and an on-device inference receipt. An unavailable or echo-only provider stays unavailable; saving original text and offline recall continue. Regression checks also prevent an old initialization from restoring readiness after a connection change, and stop an approved cloud request if its connection is withdrawn while App Check is pending.
+
+The November 20 reCAPTCHA script and registered site key loaded without the old invalid-key error, but App Check returned `403 PERMISSION_DENIED` and `App attestation failed`. No source text reached a generation endpoint in those attempts. That result does not establish whether a normal phone or desktop browser will be accepted; repeat **Verify connection** and an approved sample comparison there. A private registered development token is an alternative for an owner-controlled automated test. Enforcement was not disabled.
+
+Cloud inference has a verified historical result; current normal-browser cloud access and actual Nano inference still need confirmation. The live badge reports each operation's outcome, and captured-page model receipts are stored only after successful validated inference.
 
 Unit tests that mock the Firebase SDK verify routing, source approval, failure handling, and storage. They do not establish a live model run. The cloud result above came from the real service. Follow [Firebase setup](firebase-setup.md) to test local inference on a supported computer and repeat the full workflow there.
+
+The optional `nano-proof` job runs only when the existing GitHub workflow is dispatched manually. It uses the standard public Ubuntu runner, official Google Chrome, and an authored page. It requires a real validated Firebase device summary, its stored model receipt, and offline source recall, with zero cloud generation requests. Reports and video are retained for seven days as test evidence. A passing report is required before calling this a successful Nano run.
 
 ## Run the checks
 

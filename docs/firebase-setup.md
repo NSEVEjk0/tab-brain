@@ -12,7 +12,9 @@ The initial test had returned `403 PERMISSION_DENIED` and `AI/api-not-enabled`, 
 
 The AI request gateway is `firebasevertexai.googleapis.com`. Firebase uses `firebaseml.googleapis.com` as the AI Logic App Check enforcement identifier. The different names refer to different setup steps. A public web API key cannot enable either service or change project permissions.
 
-This server's Chromium reported its on-device model as `unavailable`, so it could not generate a Nano summary. A supported desktop computer still needs to complete the local test. If local AI is unavailable, the saved library and cloud comparison remain available.
+The November 20 test found that a newer Chromium build exposes a placeholder `LanguageModel` API that echoes input instead of running Nano. Initial official Google Chrome 158 profiles reported `unavailable` on this 6 GB VPS. With normal component updates enabled, Chrome offered a download but did not complete initialization within twelve minutes. Google's current CPU requirements are at least 16 GB RAM and four cores; the profile volume also needs at least 22 GB free space. See [the supported hardware requirements](https://developer.chrome.com/docs/ai/get-started). The optional manually dispatched CI job provides another supported-hardware test route. A successful real local summary is still required; the app verifies a built-in device-only sample before reporting the model ready.
+
+The current automated cloud check also returned an App Check attestation failure before any model request. The corrected site key loaded without its previous invalid-key error. Repeat browser verification and an approved comparison on the actual judging browser; if it fails there too, check the registration and allowed domain in the console. The earlier November 18 cloud result remains valid historical evidence.
 
 For the extension, a different host, or another Firebase project, follow the setup below. The extension prefills the public Web configuration, but its private App Check development token must be registered and entered by the owner.
 

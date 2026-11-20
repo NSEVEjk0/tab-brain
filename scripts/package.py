@@ -11,7 +11,7 @@ with zipfile.ZipFile(downloads / 'tab-brain-extension.zip', 'w', zipfile.ZIP_DEF
         if file.is_file():
             archive.write(file, Path('tab-brain') / file.relative_to(root / 'extension-dist'))
 source_roots = ['src', 'public', 'extension', 'scripts', 'docs', 'tests', 'shared', 'functions', '.github']
-source_files = ['package.json', 'package-lock.json', 'index.html', 'tsconfig.json', 'tsconfig.app.json', 'tsconfig.node.json', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'vercel.json', 'firebase.json', 'firestore.rules', 'firestore.indexes.json', 'README.md', 'LICENSE', '.gitignore', '.vercelignore', '.npmrc', '.firebaserc', '.env.example', 'CONTRIBUTING.md']
+source_files = ['package.json', 'package-lock.json', 'index.html', 'tsconfig.json', 'tsconfig.app.json', 'tsconfig.node.json', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'playwright.nano.config.ts', 'vercel.json', 'firebase.json', 'firestore.rules', 'firestore.indexes.json', 'README.md', 'LICENSE', '.gitignore', '.vercelignore', '.npmrc', '.firebaserc', '.env.example', 'CONTRIBUTING.md']
 with zipfile.ZipFile(downloads / 'tab-brain-source.zip', 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
     for name in source_files:
         file = root / name

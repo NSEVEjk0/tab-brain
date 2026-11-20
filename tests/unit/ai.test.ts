@@ -63,6 +63,13 @@ beforeEach(async () => {
   mocks.getToken.mockResolvedValue({
     token: "TEST.NOT_A_REAL_TOKEN.SIGNATURE",
   });
+  mocks.localGenerate.mockResolvedValue({
+    response: {
+      inferenceSource: "on_device",
+      text: () =>
+        '{"summary":"Saved pages stay on this device. Offline search keeps them available.","tags":["reading","offline","privacy"],"excerpts":[]}',
+    },
+  });
   tokens.clear();
   tokens.set("tab-brain-appcheck-token", "TEST_NOT_A_REAL_TOKEN");
   vi.stubGlobal("sessionStorage", {
@@ -158,6 +165,61 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
     await expect(ai.summarizeLocally(memory(), config)).rejects.toThrow(
       "on-device",
     );
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+  });
+  it("keeps local AI disabled when an exposed API only echoes its input", async () => {
+    mocks.localGenerate.mockImplementation(async (input: string) => ({
+      response: {
+        inferenceSource: "on_device",
+        text: () =>
+          "On-device model is not available in Chromium, this API is just echoing back the input:\n" +
+          input,
+      },
+    }));
+    await expect(ai.initializeLocal(config, () => undefined)).rejects.toThrow(
+      "verified on-device summary",
+    );
+    expect(ai.localModelReady()).toBe(false);
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+    expect(mocks.getToken).not.toHaveBeenCalled();
+  });
+  it.each([false, true])(
+    "does not restore an old local initialization after changing the connection (new model: %s)",
+    async (startNewModel) => {
+      let finish!: () => void;
+      mocks.localInitialize.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finish = resolve;
+          }),
+      );
+      const previous = ai.initializeLocal(config, () => undefined);
+      ai.resetModels();
+      if (startNewModel)
+        await ai.initializeLocal(
+          { ...config, model: "another-cloud-model" },
+          () => undefined,
+        );
+      finish();
+      await expect(previous).rejects.toThrow("settings changed");
+      expect(ai.localModelReady()).toBe(startNewModel);
+      expect(mocks.localGenerate).toHaveBeenCalledTimes(startNewModel ? 1 : 0);
+      expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+    },
+  );
+  it("keeps approved snippets local if the connection is withdrawn while verification is pending", async () => {
+    let finish!: (value: { token: string }) => void;
+    mocks.getToken.mockImplementationOnce(
+      () =>
+        new Promise<{ token: string }>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const preview = previewCloud("What is useful?", [memory()]);
+    const pending = ai.askCloud(preview, config, preview.requestText);
+    ai.resetModels();
+    finish({ token: "TEST.NOT_A_REAL_TOKEN.SIGNATURE" });
+    await expect(pending).rejects.toThrow("connection changed");
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
   });
   it("keeps only verbatim source excerpts from a local model response", async () => {
