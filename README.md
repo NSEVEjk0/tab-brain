@@ -24,6 +24,8 @@ Tab Brain saves readable text, your notes, and the original link in a library on
 
 ## How Firebase fits
 
+Firebase AI Logic gives Tab Brain one SDK for Chrome's on-device Gemini Nano and a cloud Gemini model. Each task uses a fixed inference mode so a local summary stays on the device.
+
 **While you save a page**, Firebase AI Logic calls Gemini Nano in Chrome with device-only inference. Chrome processes the page on your device. Tab Brain keeps the original text and labels a summary once the SDK reports that it ran on-device.
 
 **When you compare pages**, Firebase AI Logic uses the cloud Gemini model. Firebase App Check verifies the browser before the request. You see the excerpts before approving them, and personal notes stay in your library. The answer keeps its model, source links, and capture dates.

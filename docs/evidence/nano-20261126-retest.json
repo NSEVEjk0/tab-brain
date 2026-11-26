@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-11-26T11:10:38.667Z",
+  "browser": "Google Chrome 157.0.8103.78",
+  "input": "authored test page; no personal data",
+  "cloudGenerationRequests": [],
+  "memory": [
+    "MemTotal:       16366632 kB",
+    "MemAvailable:   14919196 kB"
+  ],
+  "initialization": {
+    "ready": true,
+    "errors": []
+  },
+  "savedResult": {
+    "summary": "This resource offers offline access to authored pages, preserving original text and private notes. Users can organize pages into collections and search them later using separately approved snippets from cloud comparisons.",
+    "tags": [
+      "Offline Reading",
+      "Page Organization",
+      "Cloud Comparison"
+    ],
+    "modelEvidence": {
+      "name": "Gemini Nano",
+      "inferenceSource": "on-device",
+      "verifiedAt": "2026-11-26T11:12:08.707Z"
+    },
+    "originalTextRetained": true
+  },
+  "offlineRecall": true,
+  "passed": true,
+  "testedCommit": "c28a702909a01a2dd3e42aee2156f0ab58618a60",
+  "run": "https://github.com/NSEVEjk0/tab-brain/actions/runs/45808117957"
+}

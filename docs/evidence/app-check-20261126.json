@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-26T11:09:27.368Z",
+  "url": "https://tab-brain-memory.vercel.app",
+  "appCheck": [
+    {
+      "action": "exchangeRecaptchaEnterpriseToken",
+      "http": 403,
+      "status": "PERMISSION_DENIED",
+      "reason": "App attestation failed."
+    }
+  ],
+  "generation": [],
+  "browserVerified": false,
+  "verificationMessage": "Firebase App Check rejected this browser (403). Reload in a regular Chrome window and try again. If it still fails, the project owner can check the site registration and App Check metrics.",
+  "comparisonSucceeded": false,
+  "comparisonMessage": "Firebase App Check rejected this browser (403). Reload in a regular Chrome window and try again. If it still fails, the project owner can check the site registration and App Check metrics.",
+  "browser": "Google Chrome 158.0.8127.36, headed on the VPS",
+  "testedCommit": "c28a702909a01a2dd3e42aee2156f0ab58618a60"
+}
