@@ -1,6 +1,8 @@
 # What we checked
 
-On November 26, the public site served the extension and source bundles, both downloads matched their published checksums, and both production browser checks passed. In a headed Google Chrome session, Firebase App Check returned HTTP 403 `App attestation failed` before the app sent source text. The record below includes the successful November 18 cloud run and November 20 device run. Test public cloud access from a regular desktop browser as described in [Firebase setup](firebase-setup.md).
+On November 26, all 55 unit tests and 16 browser tests passed. The production site served both download bundles with matching checksums. Google Chrome 157 generated a [new on-device Firebase AI Logic summary](evidence/nano-20261126.json) without a cloud configuration, kept the original text, and found it after an offline reload. The [GitHub run](https://github.com/NSEVEjk0/tab-brain/actions/runs/45785150148) records zero cloud generation requests during that check.
+
+In a separate headed Google Chrome session, Firebase App Check returned HTTP 403 `App attestation failed` before the app sent source text. The record below includes the successful November 18 cloud run. Test public cloud access from a regular desktop browser as described in [Firebase setup](firebase-setup.md).
 
 Updated on November 20, 2026, using Node 24 for the app, Node 22 for the email backend, Chromium for interface checks, and official Google Chrome 158 for the current real-model probe. The public app is at https://tab-brain-memory.vercel.app. Historical service results retain their original dates below.
 
