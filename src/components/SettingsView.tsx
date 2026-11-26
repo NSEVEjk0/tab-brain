@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { APP_CHECK_SESSION_KEY, isExtension } from "../constants";
 import { friendlyError, initializeLocal, verifyConnection } from "../ai";
+import { appCheckNeedsReload } from "../appCheck";
 import { validateAIConfig } from "../library";
 import {
   DEFAULT_CLOUD_MODEL,
@@ -32,17 +33,15 @@ export function SettingsView({
   onExport,
   onImport,
   onClearSamples,
-  onLocalReady,
 }: {
   settings: Settings;
   memories: Memory[];
   collections: Collection[];
   sampleCount: number;
-  onSave: (config?: AIConfig) => Promise<void>;
+  onSave: (config?: AIConfig, debugToken?: string) => Promise<void>;
   onExport: () => void;
   onImport: () => void;
   onClearSamples: () => Promise<void>;
-  onLocalReady: () => void;
 }) {
   const defaultConfig = hostedAIConfig();
   const [json, setJson] = useState(
@@ -60,26 +59,45 @@ export function SettingsView({
   const [model, setModel] = useState(settings.ai?.model ?? DEFAULT_CLOUD_MODEL);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState<"local" | "verify">();
+  const [busy, setBusy] = useState<"local" | "verify" | "save">();
   const [progress, setProgress] = useState(0);
   const [confirmClear, setConfirmClear] = useState(false);
   async function save(event: React.FormEvent) {
     event.preventDefault();
+    setBusy("save");
     setError("");
     setMessage("");
     try {
       const config = validateAIConfig(json, mode, siteKey, model);
-      if (mode === "debug" && !token.trim())
-        throw new Error("Enter a registered App Check development token.");
-      if (mode === "debug")
-        sessionStorage.setItem(APP_CHECK_SESSION_KEY, token.trim());
-      else sessionStorage.removeItem(APP_CHECK_SESSION_KEY);
-      await onSave(config);
+      const debugToken = mode === "debug" ? token.trim() : "";
+      if (mode === "debug" && !debugToken)
+        throw new Error("Enter a registered development token from Firebase.");
+      await onSave(config, debugToken);
+      if (appCheckNeedsReload(config, debugToken)) {
+        location.reload();
+        return;
+      }
       setMessage(
-        "Connection settings saved on this device. Enable the local model below, or review a source question to verify cloud inference.",
+        "Connection saved. Choose Verify connection to test it.",
       );
     } catch (error) {
       setError(friendlyError(error));
+    } finally {
+      setBusy(undefined);
+    }
+  }
+  async function disconnect() {
+    setBusy("save");
+    setError("");
+    setMessage("");
+    try {
+      await onSave(undefined);
+      setToken("");
+      setMessage("Cloud connection removed.");
+    } catch (error) {
+      setError(friendlyError(error));
+    } finally {
+      setBusy(undefined);
     }
   }
   async function enable() {
@@ -88,8 +106,7 @@ export function SettingsView({
     setMessage("");
     setProgress(0);
     try {
-      await initializeLocal(settings.ai, setProgress);
-      onLocalReady();
+      await initializeLocal(setProgress);
       setMessage(
         "The on-device model is ready in this browser. New page summaries can now run locally.",
       );
@@ -182,7 +199,8 @@ export function SettingsView({
               Check.
             </li>
             <li>
-              Save the configuration below, then verify the connection.
+              Save the configuration below, then verify the connection. Tab Brain
+              may reload to apply a change to browser verification.
             </li>
           </ol>
           <a
@@ -292,15 +310,7 @@ export function SettingsView({
                 className="button ghost"
                 type="button"
                 disabled={Boolean(busy)}
-                onClick={async () => {
-                  sessionStorage.removeItem(APP_CHECK_SESSION_KEY);
-                  await onSave(undefined);
-                  setJson("");
-                  setToken("");
-                  setMessage(
-                    "AI connection removed. Your saved memories are kept.",
-                  );
-                }}
+                onClick={disconnect}
               >
                 Disconnect
               </button>

@@ -6,7 +6,7 @@ import { previewCloud } from "../../src/library";
 const mocks = vi.hoisted(() => ({
   initializeApp: vi.fn(() => ({ name: "test-app" })),
   deleteApp: vi.fn(async () => undefined),
-  appCheck: vi.fn(() => ({})),
+  appCheck: vi.fn((app: unknown) => ({ app })),
   getToken: vi.fn(),
   getAI: vi.fn(() => ({})),
   localInitialize: vi.fn(async (progress: (value: number) => void) =>
@@ -23,6 +23,7 @@ vi.mock("firebase/app", () => ({
 vi.mock("firebase/app-check", () => ({
   initializeAppCheck: mocks.appCheck,
   getToken: mocks.getToken,
+  CustomProvider: class {},
   ReCaptchaEnterpriseProvider: class {
     constructor(public key: string) {}
   },
@@ -79,31 +80,29 @@ beforeEach(async () => {
     protocol: "https:",
     origin: "https://example.com",
   });
-  vi.stubGlobal("self", {});
   ai = await import("../../src/ai");
 });
 describe("explicit Firebase inference boundaries (SDK mocked)", () => {
-  it("creates a device-only capture model and a separate cloud-only model", () => {
-    ai.configureModels(config);
+  it("uses separate Firebase apps for device-only capture and cloud comparison", async () => {
+    await ai.initializeLocal(() => undefined);
+    expect(mocks.appCheck).not.toHaveBeenCalled();
+    await ai.verifyConnection(config);
     expect(
       mocks.model.mock.calls.map((call) => (call[1] as { mode: string }).mode),
     ).toEqual(["only_on_device", "only_in_cloud"]);
-    expect(mocks.appCheck).toHaveBeenCalled();
-    expect(mocks.localGenerate).not.toHaveBeenCalled();
+    expect(mocks.initializeApp).toHaveBeenCalledTimes(2);
+    expect(mocks.appCheck).toHaveBeenCalledTimes(1);
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
   });
-  it.each([undefined, config])(
-    "runs local summaries without a cloud connection (%s)",
-    async (localConfig) => {
-      tokens.clear();
-      await ai.initializeLocal(localConfig, () => undefined);
-      const saved = await ai.summarizeLocally(memory(), localConfig);
-      expect(saved.modelEvidence?.inferenceSource).toBe("on-device");
-      expect(mocks.appCheck).not.toHaveBeenCalled();
-      expect(mocks.getToken).not.toHaveBeenCalled();
-      expect(mocks.cloudGenerate).not.toHaveBeenCalled();
-    },
-  );
+  it("runs local summaries without a cloud connection", async () => {
+    tokens.clear();
+    await ai.initializeLocal(() => undefined);
+    const saved = await ai.summarizeLocally(memory());
+    expect(saved.modelEvidence?.inferenceSource).toBe("on-device");
+    expect(mocks.appCheck).not.toHaveBeenCalled();
+    expect(mocks.getToken).not.toHaveBeenCalled();
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+  });
   it("requires a registered session token before a development cloud request", async () => {
     tokens.clear();
     const preview = previewCloud("Question", [memory()]);
@@ -143,10 +142,25 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
   });
   it("can verify the browser without running either model", async () => {
     await ai.verifyConnection(config);
-    expect(mocks.getToken).toHaveBeenCalled();
+    expect(mocks.getToken).toHaveBeenCalledWith(expect.anything(), true);
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
     expect(mocks.localGenerate).not.toHaveBeenCalled();
     expect(mocks.localInitialize).not.toHaveBeenCalled();
+  });
+  it("times out when verification stalls and keeps the approved snippets local", async () => {
+    vi.useFakeTimers();
+    try {
+      mocks.getToken.mockImplementationOnce(() => new Promise(() => {}));
+      const preview = previewCloud("Question", [memory()]);
+      const error = expect(
+        ai.askCloud(preview, config, preview.requestText),
+      ).rejects.toThrow("Browser verification timed out");
+      await vi.advanceTimersByTimeAsync(20_000);
+      await error;
+      expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
   it("distinguishes the local API-not-enabled error from a disabled Firebase service", () => {
     expect(
@@ -168,9 +182,14 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
         new Error("AppCheck: ReCAPTCHA error. (appCheck/recaptcha-error)."),
       ),
     ).toContain("Browser verification failed");
+    expect(
+      ai.friendlyError(
+        new Error("AppCheck: HTTP status: 403. (appCheck/initial-throttle)."),
+      ),
+    ).toContain("Firebase App Check rejected this browser (403)");
   });
   it("does not label a cloud response as an on-device summary", async () => {
-    await ai.initializeLocal(config, () => undefined);
+    await ai.initializeLocal(() => undefined);
     mocks.localGenerate.mockResolvedValue({
       response: {
         inferenceSource: "in_cloud",
@@ -178,7 +197,7 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
           '{"summary":"A useful summary. A second sentence.","tags":["one","two","three"]}',
       },
     });
-    await expect(ai.summarizeLocally(memory(), config)).rejects.toThrow(
+    await expect(ai.summarizeLocally(memory())).rejects.toThrow(
       "on-device",
     );
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
@@ -192,37 +211,31 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
           input,
       },
     }));
-    await expect(ai.initializeLocal(config, () => undefined)).rejects.toThrow(
+    await expect(ai.initializeLocal(() => undefined)).rejects.toThrow(
       "verified on-device summary",
     );
     expect(ai.localModelReady()).toBe(false);
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
     expect(mocks.getToken).not.toHaveBeenCalled();
   });
-  it.each([false, true])(
-    "does not restore an old local initialization after changing the connection (new model: %s)",
-    async (startNewModel) => {
-      let finish!: () => void;
-      mocks.localInitialize.mockImplementationOnce(
-        () =>
-          new Promise<void>((resolve) => {
-            finish = resolve;
-          }),
-      );
-      const previous = ai.initializeLocal(config, () => undefined);
-      ai.resetModels();
-      if (startNewModel)
-        await ai.initializeLocal(
-          { ...config, model: "another-cloud-model" },
-          () => undefined,
-        );
-      finish();
-      await expect(previous).rejects.toThrow("settings changed");
-      expect(ai.localModelReady()).toBe(startNewModel);
-      expect(mocks.localGenerate).toHaveBeenCalledTimes(startNewModel ? 1 : 0);
-      expect(mocks.cloudGenerate).not.toHaveBeenCalled();
-    },
-  );
+  it("keeps Nano ready when the separate cloud connection is removed", async () => {
+    let finish!: () => void;
+    mocks.localInitialize.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const pending = ai.initializeLocal(() => undefined);
+    await ai.verifyConnection(config);
+    ai.resetCloudConnection();
+    finish();
+    await pending;
+    const saved = await ai.summarizeLocally(memory());
+    expect(saved.modelEvidence?.inferenceSource).toBe("on-device");
+    expect(ai.localModelReady()).toBe(true);
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+  });
   it("keeps approved snippets local if the connection is withdrawn while verification is pending", async () => {
     let finish!: (value: { token: string }) => void;
     mocks.getToken.mockImplementationOnce(
@@ -233,13 +246,13 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
     );
     const preview = previewCloud("What is useful?", [memory()]);
     const pending = ai.askCloud(preview, config, preview.requestText);
-    ai.resetModels();
+    ai.resetCloudConnection();
     finish({ token: "TEST.NOT_A_REAL_TOKEN.SIGNATURE" });
     await expect(pending).rejects.toThrow("connection changed");
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
   });
   it("keeps only verbatim source excerpts from a local model response", async () => {
-    await ai.initializeLocal(config, () => undefined);
+    await ai.initializeLocal(() => undefined);
     mocks.localGenerate.mockResolvedValue({
       response: {
         inferenceSource: "on_device",
@@ -254,7 +267,7 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
           }),
       },
     });
-    const summarized = await ai.summarizeLocally(memory(), config);
+    const summarized = await ai.summarizeLocally(memory());
     expect(summarized.analysis).toBe("on-device");
     expect(summarized.excerpts).toEqual([
       "The useful detail is preserved in this original page text.",
@@ -266,14 +279,14 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
     });
   });
   it("rejects summaries that do not contain two sentences and three tags", async () => {
-    await ai.initializeLocal(config, () => undefined);
+    await ai.initializeLocal(() => undefined);
     mocks.localGenerate.mockResolvedValue({
       response: {
         inferenceSource: "on_device",
         text: () => '{"summary":"One sentence.","tags":["research"]}',
       },
     });
-    await expect(ai.summarizeLocally(memory(), config)).rejects.toThrow(
+    await expect(ai.summarizeLocally(memory())).rejects.toThrow(
       "two summary sentences",
     );
   });

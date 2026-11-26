@@ -271,6 +271,129 @@ test("cloud review minimizes sources, supports exclusion, and never sends withou
   ).toHaveAttribute("data-phase", "idle");
 });
 
+test("saving a new verification method reloads the SDK and sends only the approved sources", async ({
+  page,
+}) => {
+  const exchanges: { method: string; body: string }[] = [];
+  const generation: { body: string; appCheck: string }[] = [];
+  const token = "test.app-check.signature";
+  await page.addInitScript(() => {
+    // Simulate the reCAPTCHA widget. Firebase's App Check and AI Logic SDKs still run.
+    Object.assign(window, {
+      grecaptcha: {
+        enterprise: {
+          ready: (run: () => void) => run(),
+          render: (_: unknown, options: { callback: () => void }) => {
+            options.callback();
+            return 0;
+          },
+          execute: async () => "test-captcha-attestation",
+        },
+      },
+    });
+  });
+  await page.route(
+    "https://content-firebaseappcheck.googleapis.com/**",
+    async (route) => {
+      exchanges.push({
+        method: new URL(route.request().url()).pathname.split(":").at(-1)!,
+        body: route.request().postData() ?? "",
+      });
+      await route.fulfill({ json: { token, ttl: "3600s" } });
+    },
+  );
+  await page.route("https://firebasevertexai.googleapis.com/**", async (route) => {
+    generation.push({
+      body: route.request().postData() ?? "",
+      appCheck:
+        (await route.request().headerValue("x-firebase-appcheck")) ?? "",
+    });
+    await route.fulfill({
+      json: {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [
+                {
+                  text: JSON.stringify({
+                    answer: "The example includes offline editing [1].",
+                    unknowns: [],
+                  }),
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  await page.goto("/#settings");
+  await page.getByLabel("reCAPTCHA Enterprise site key").fill("TEST_SITE_KEY");
+  await page.getByRole("button", { name: "Save connection" }).click();
+  const verify = page.getByRole("button", {
+    name: "Verify connection",
+    exact: true,
+  });
+  await expect(verify).toBeEnabled();
+  expect(exchanges).toEqual([]);
+  await verify.click();
+  await expect(page.getByText(/^Firebase verified this browser/)).toBeVisible();
+  expect(exchanges.map(({ method }) => method)).toEqual([
+    "exchangeRecaptchaEnterpriseToken",
+  ]);
+
+  await page.getByLabel("App Check verification").selectOption("debug");
+  await page
+    .getByLabel("App Check development token")
+    .fill("TEST_DEVELOPMENT_TOKEN");
+  const reloaded = page.waitForEvent("domcontentloaded");
+  await page.getByRole("button", { name: "Save connection" }).click();
+  await reloaded;
+  await expect(page.getByLabel("App Check verification")).toHaveValue("debug");
+  await expect(page.getByLabel("App Check development token")).toHaveValue(
+    "TEST_DEVELOPMENT_TOKEN",
+  );
+  await verify.click();
+  await expect(page.getByText(/^Firebase verified this browser/)).toBeVisible();
+  expect(exchanges.map(({ method }) => method)).toEqual([
+    "exchangeRecaptchaEnterpriseToken",
+    "exchangeDebugToken",
+  ]);
+  expect(exchanges[1].body).toContain("TEST_DEVELOPMENT_TOKEN");
+  expect(generation).toEqual([]);
+
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("button", { name: "Ask my tabs" })
+    .click();
+  await page.getByRole("button", { name: "Compare my research tools" }).click();
+  const review = page.getByRole("dialog");
+  await review
+    .getByRole("checkbox", { name: /Orbit: a focused research workspace/ })
+    .uncheck();
+  expect(generation).toEqual([]);
+  await review.getByRole("button", { name: "Approve & send to Gemini" }).click();
+  const answer = page.locator(".answer-card");
+  await expect(answer.getByTestId("model-receipt")).toContainText("cloud");
+  await expect(
+    answer.getByRole("button", { name: /^Open source 1:/ }),
+  ).toBeVisible();
+  const downloading = page.waitForEvent("download");
+  await answer.getByRole("button", { name: /^Download brief:/ }).click();
+  const brief = await readFile(await (await downloading).path(), "utf8");
+  expect(brief).toContain("## Sources");
+  expect(brief).toContain("[1]");
+  expect(generation).toHaveLength(1);
+  expect(generation[0].body).not.toContain(
+    "Orbit: a focused research workspace",
+  );
+  expect(generation[0].appCheck).toBe(token);
+  await page.reload();
+  await expect(answer.getByTestId("model-receipt")).toBeVisible();
+});
+
 test("personal notes, reminders, calendar export, and reading status survive reload", async ({
   page,
 }) => {

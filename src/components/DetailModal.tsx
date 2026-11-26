@@ -22,19 +22,17 @@ import {
 } from "../ai";
 import { hostname } from "../library";
 import { openSource } from "../extension";
-import type { AIConfig, Collection, Memory } from "../types";
+import type { Collection, Memory } from "../types";
 
 export function DetailModal({
   memory,
   collections,
-  config,
   onClose,
   onUpdate,
   onDelete,
 }: {
   memory: Memory;
   collections: Collection[];
-  config?: AIConfig;
   onClose: () => void;
   onUpdate: (memory: Memory) => Promise<void>;
   onDelete: () => Promise<void>;
@@ -52,10 +50,10 @@ export function DetailModal({
     setMessage("Preparing local summary…");
     try {
       if (!localModelReady())
-        await initializeLocal(config, (value) =>
+        await initializeLocal((value) =>
           setMessage(`Preparing on-device model · ${Math.round(value * 100)}%`),
         );
-      const updated = await summarizeLocally(memory, config);
+      const updated = await summarizeLocally(memory);
       await onUpdate(updated);
       setMessage("Summary generated on this device.");
       setTags(updated.tags.join(", "));

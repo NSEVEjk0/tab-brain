@@ -46,8 +46,9 @@ import {
   showWebReminder,
 } from "./reminders";
 import { syncExtensionReminders } from "./extensionReminders";
-import { isExtension } from "./constants";
-import { friendlyError, localModelReady, resetModels } from "./ai";
+import { APP_CHECK_SESSION_KEY, isExtension } from "./constants";
+import { friendlyError, resetCloudConnection } from "./ai";
+import { saveAppCheckDebugToken } from "./appCheck";
 import * as db from "./db";
 import {
   MAX_IMPORT_BYTES,
@@ -122,7 +123,6 @@ export default function App() {
   const [toast, setToast] = useState<{ text: string; error?: boolean }>();
   const [sidebar, setSidebar] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
-  const [localReady, setLocalReady] = useState(localModelReady());
   const [now, setNow] = useState(Date.now());
   const searchRef = useRef<HTMLInputElement>(null);
   const importRef = useRef<HTMLInputElement>(null);
@@ -352,14 +352,19 @@ export default function App() {
   }
   async function captured(message: string) {
     await refresh();
-    setLocalReady(localModelReady());
     notify(message);
   }
-  async function saveConfig(config?: AIConfig) {
-    await db.updateSettings({ ai: config });
-    resetModels();
-    setLocalReady(false);
-    await refresh();
+  async function saveConfig(config?: AIConfig, debugToken = "") {
+    const previousToken = sessionStorage.getItem(APP_CHECK_SESSION_KEY) ?? "";
+    saveAppCheckDebugToken(debugToken);
+    resetCloudConnection();
+    try {
+      const settings = await db.updateSettings({ ai: config });
+      setData((current) => ({ ...current, settings }));
+    } catch (error) {
+      saveAppCheckDebugToken(previousToken);
+      throw error;
+    }
   }
   async function changeNotifications(enabled: boolean) {
     if (enabled) await requestReminderPermission();
@@ -695,7 +700,6 @@ export default function App() {
                 await refresh();
                 notify("Sample pages removed. Make this space your own.");
               }}
-              onLocalReady={() => setLocalReady(true)}
             />
           ) : (
             <>
@@ -1168,7 +1172,6 @@ export default function App() {
         <CaptureModal
           memories={data.memories}
           collections={data.collections}
-          config={data.settings.ai}
           scope={capture.scope}
           tabId={capture.tabId}
           onClose={() => setCapture(undefined)}
@@ -1183,7 +1186,6 @@ export default function App() {
         <DetailModal
           memory={detail}
           collections={data.collections}
-          config={data.settings.ai}
           onClose={() => setDetailId(undefined)}
           onUpdate={updateMemory}
           onDelete={async () => {

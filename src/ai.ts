@@ -1,9 +1,5 @@
 import { deleteApp, initializeApp } from "firebase/app";
-import {
-  getToken,
-  initializeAppCheck,
-  ReCaptchaEnterpriseProvider,
-} from "firebase/app-check";
+import { getToken } from "firebase/app-check";
 import {
   getAI,
   getGenerativeModel,
@@ -12,21 +8,23 @@ import {
   InferenceSource,
 } from "firebase/ai";
 import type { AIConfig, CloudPreview, Memory, ModelEvidence } from "./types";
-import { APP_CHECK_SESSION_KEY } from "./constants";
+import { appCheckDebugToken, initializeBrowserAppCheck } from "./appCheck";
 import { FIREBASE_WEB_CONFIG } from "./firebaseConfig";
 import { excerpt, parseAnswer, sentences } from "./library";
-import { cloudModelName, idleAIStatus, publishAIStatus } from "./aiStatus";
+import {
+  cloudModelName,
+  getAIStatus,
+  idleAIStatus,
+  publishAIStatus,
+} from "./aiStatus";
 
-type Models = {
-  local: ReturnType<typeof getGenerativeModel>;
-  cloud?: {
-    appCheck: ReturnType<typeof initializeAppCheck>;
-    model: ReturnType<typeof getGenerativeModel>;
-  };
+type CloudModel = {
+  appCheck: ReturnType<typeof initializeBrowserAppCheck>;
+  model: ReturnType<typeof getGenerativeModel>;
   key: string;
 };
-let models: Models | undefined;
-let configuredApp: ReturnType<typeof initializeApp> | undefined;
+let cloud: CloudModel | undefined;
+let local: ReturnType<typeof getGenerativeModel> | undefined;
 let deviceReady = false;
 
 const systemInstruction =
@@ -99,95 +97,97 @@ function parseLocalSummary(response: {
   };
 }
 
-export function configureModels(config?: AIConfig): Models {
-  const token =
-    config?.appCheckMode === "debug"
-      ? (sessionStorage.getItem(APP_CHECK_SESSION_KEY) ?? "")
-      : "";
-  const key = JSON.stringify(config) + token;
-  if (models?.key === key) return models;
-  if (configuredApp) {
-    void deleteApp(configuredApp);
-    configuredApp = undefined;
-  }
-  models = undefined;
-  deviceReady = false;
-  const app = initializeApp(
-    config?.firebase ?? FIREBASE_WEB_CONFIG,
-    `tab-brain-${crypto.randomUUID()}`,
-  );
-  configuredApp = app;
-  let appCheck: ReturnType<typeof initializeAppCheck> | undefined;
-  // Chrome's device model can run before a cloud connection is configured.
-  if (config && (config.appCheckMode === "enterprise" || token)) {
-    (
-      self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }
-    ).FIREBASE_APPCHECK_DEBUG_TOKEN = token || false;
-    appCheck = initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(
-        config.siteKey || "tab-brain-development",
-      ),
-      isTokenAutoRefreshEnabled: true,
-    });
-  }
+function deviceModel() {
+  if (local) return local;
+  const app = initializeApp(FIREBASE_WEB_CONFIG, "tab-brain-device");
   const ai = getAI(app, { backend: new GoogleAIBackend() });
-  models = {
-    key,
-    local: getGenerativeModel(ai, {
-      mode: InferenceMode.ONLY_ON_DEVICE,
-      onDeviceParams: {
-        promptOptions: { responseConstraint: localSummarySchema },
-        createOptions: {
-          expectedInputs: [{ type: "text", languages: ["en"] }],
-          expectedOutputs: [{ type: "text", languages: ["en"] }],
-          initialPrompts: [
-            {
-              role: "system",
-              content: [{ type: "text", value: systemInstruction }],
-            },
-          ],
-        },
-      },
-    }),
-    ...(appCheck && config && {
-      cloud: {
-        appCheck,
-        model: getGenerativeModel(ai, {
-          mode: InferenceMode.ONLY_IN_CLOUD,
-          inCloudParams: {
-            model: config.model,
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.2,
-              maxOutputTokens: 2600,
-            },
-            systemInstruction,
+  local = getGenerativeModel(ai, {
+    mode: InferenceMode.ONLY_ON_DEVICE,
+    onDeviceParams: {
+      promptOptions: { responseConstraint: localSummarySchema },
+      createOptions: {
+        expectedInputs: [{ type: "text", languages: ["en"] }],
+        expectedOutputs: [{ type: "text", languages: ["en"] }],
+        initialPrompts: [
+          {
+            role: "system",
+            content: [{ type: "text", value: systemInstruction }],
           },
-        }),
+        ],
       },
-    }),
-  };
-  return models;
+    },
+  });
+  return local;
+}
+
+function cloudModel(config: AIConfig): CloudModel {
+  const key = JSON.stringify([config, appCheckDebugToken(config)]);
+  if (cloud?.key === key) return cloud;
+  if (cloud) {
+    void deleteApp(cloud.appCheck.app);
+    cloud = undefined;
+  }
+  const app = initializeApp(
+    config.firebase,
+    `tab-brain-cloud-${crypto.randomUUID()}`,
+  );
+  try {
+    const appCheck = initializeBrowserAppCheck(app, config);
+    const ai = getAI(app, { backend: new GoogleAIBackend() });
+    cloud = {
+      key,
+      appCheck,
+      model: getGenerativeModel(ai, {
+        mode: InferenceMode.ONLY_IN_CLOUD,
+        inCloudParams: {
+          model: config.model,
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.2,
+            maxOutputTokens: 2600,
+          },
+          systemInstruction,
+        },
+      }),
+    };
+    return cloud;
+  } catch (error) {
+    void deleteApp(app);
+    throw error;
+  }
 }
 
 async function verifiedModel(
   config: AIConfig,
+  refreshToken = false,
 ): Promise<ReturnType<typeof getGenerativeModel>> {
-  const current = configureModels(config);
-  if (!current.cloud)
-    throw new Error(
-      "Add your registered App Check development token in AI settings. It stays in this browser session.",
-    );
-  const result = await getToken(current.cloud.appCheck);
-  if (models !== current)
-    throw new Error(
-      "The AI connection changed during browser verification. Review your sources and approve the request again.",
-    );
-  if (!result.token || result.token.split(".").length !== 3)
-    throw new Error(
-      "Firebase App Check returned no valid token. Verify the connection in Settings and try again.",
-    );
-  return current.cloud.model;
+  const current = cloudModel(config);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const result = await Promise.race([
+      getToken(current.appCheck, refreshToken),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(
+            new Error(
+              "Browser verification timed out. Check your connection, allow the reCAPTCHA script to load, and reload Tab Brain to retry.",
+            ),
+          );
+        }, 20_000);
+      }),
+    ]);
+    if (cloud !== current)
+      throw new Error(
+        "The AI connection changed during browser verification. Review your sources and approve the request again.",
+      );
+    if (!result.token || result.token.split(".").length !== 3)
+      throw new Error(
+        "Firebase returned no valid token. Verify the connection in Settings and try again.",
+      );
+    return current.model;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function verifyConnection(config: AIConfig): Promise<void> {
@@ -199,7 +199,7 @@ export async function verifyConnection(config: AIConfig): Promise<void> {
       "Firebase App Check is verifying the registered browser connection.",
   });
   try {
-    await verifiedModel(config);
+    await verifiedModel(config, true);
     publishAIStatus({
       phase: "complete",
       location: "cloud",
@@ -221,10 +221,8 @@ export function localModelReady() {
   return deviceReady;
 }
 export async function initializeLocal(
-  config: AIConfig | undefined,
   progress: (value: number) => void,
 ): Promise<void> {
-  let current: Models | undefined;
   publishAIStatus({
     phase: "preparing",
     location: "device",
@@ -233,8 +231,7 @@ export async function initializeLocal(
     detail: "Chrome is checking or downloading the on-device model.",
   });
   try {
-    current = configureModels(config);
-    const { local } = current;
+    const local = deviceModel();
     // Called directly from a button so Chrome receives user activation.
     await local.initializeDeviceModel((value) => {
       const fraction = Math.min(1, Math.max(0, value));
@@ -247,10 +244,6 @@ export async function initializeLocal(
         detail: "The on-device model is downloading or initializing.",
       });
     });
-    if (models !== current)
-      throw new Error(
-        "AI settings changed while the model was preparing. Enable on-device AI again with the current settings.",
-      );
     publishAIStatus({
       phase: "preparing",
       location: "device",
@@ -271,31 +264,23 @@ export async function initializeLocal(
         "Local LanguageModel could not produce a verified on-device summary. Use compatible desktop Google Chrome with Gemini Nano downloaded. Saved excerpts and offline search still work.",
       );
     }
-    if (models !== current)
-      throw new Error(
-        "AI settings changed while the model was preparing. Enable on-device AI again with the current settings.",
-      );
     deviceReady = true;
     idleAIStatus(true);
   } catch (error) {
-    if (!current || models === current) {
-      deviceReady = false;
-      publishAIStatus({
-        phase: "error",
-        location: "device",
-        label: "Local AI unavailable",
-        detail: friendlyError(error),
-      });
-    }
+    deviceReady = false;
+    publishAIStatus({
+      phase: "error",
+      location: "device",
+      label: "Local AI unavailable",
+      detail: friendlyError(error),
+    });
     throw error;
   }
 }
 export async function summarizeLocally(
   memory: Memory,
-  config?: AIConfig,
 ): Promise<Memory> {
-  const { local } = configureModels(config);
-  if (!deviceReady)
+  if (!deviceReady || !local)
     throw new Error(
       "Enable the on-device model before summarizing a saved page.",
     );
@@ -419,14 +404,12 @@ export async function askCloud(
     throw error;
   }
 }
-export function resetModels() {
-  deviceReady = false;
-  models = undefined;
-  idleAIStatus(false);
-  if (configuredApp) {
-    void deleteApp(configuredApp);
-    configuredApp = undefined;
+export function resetCloudConnection() {
+  if (cloud) {
+    void deleteApp(cloud.appCheck.app);
+    cloud = undefined;
   }
+  if (getAIStatus().location === "cloud") idleAIStatus(deviceReady);
 }
 export function friendlyError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
@@ -438,13 +421,15 @@ export function friendlyError(error: unknown): string {
     return "On-device AI is unavailable in this browser. Use compatible desktop Chrome with the model downloaded. Saved excerpts and offline search still work.";
   if (/app.?check\/recaptcha-error|recaptcha error/i.test(message))
     return "Browser verification failed. Check that your reCAPTCHA Enterprise key allows this website, then retry in a regular browser.";
+  if (/app.?check.*403|app attestation failed/i.test(message))
+    return "Firebase App Check rejected this browser (403). Reload in a regular Chrome window and try again. If it still fails, the project owner can check the site registration and App Check metrics.";
   if (
     /api-not-enabled|firebase ai (logic )?api.*(not.*enabled|to be enabled)|has not been used.*disabled/i.test(
       message,
     )
   )
     return "Firebase AI Logic is not enabled for this project yet. Open Firebase → AI Logic → Get started and choose the Gemini Developer API.";
-  if (/app.?check|attestation/i.test(message))
+  if (/app.?check[/:]|attestation/i.test(message))
     return "Firebase could not verify this browser. Use Verify connection in Settings, and check that its site key or private development token is registered.";
   if (/403|permission.denied/i.test(message))
     return "Firebase refused this request. Check the project's AI Logic access and App Check settings.";

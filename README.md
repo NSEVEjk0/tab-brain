@@ -30,6 +30,10 @@ Tab Brain saves readable text, your notes, and the original link in a library on
 
 [How it works](docs/architecture.md) · [Firebase and Chrome setup](docs/firebase-setup.md) · [What was tested](docs/validation.md) · [Data and backups](docs/privacy.md)
 
+## Browser and service requirements
+
+The extension reads tabs you choose. On the website, paste the text or try the sample library. Gemini Nano needs supported desktop Chrome and an initial model download. Saved text, notes, and search work offline. Cloud comparisons need an internet connection and browser verification from Firebase App Check. The reading brief can be downloaded without an account. Scheduled email delivery needs a configured sender and Firebase backend. [Current test results](docs/validation.md) · [Email setup](docs/email-setup.md)
+
 ## Run it locally
 
 Use Node 24 and Python 3.

@@ -1,9 +1,5 @@
 import { getApps, initializeApp } from "firebase/app";
 import {
-  initializeAppCheck,
-  ReCaptchaEnterpriseProvider,
-} from "firebase/app-check";
-import {
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -12,7 +8,7 @@ import {
   type User,
 } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { APP_CHECK_SESSION_KEY } from "./constants";
+import { initializeBrowserAppCheck } from "./appCheck";
 import type { AIConfig } from "./types";
 import type {
   EmailPlanInput,
@@ -43,23 +39,9 @@ function client(config: AIConfig) {
   if (saved) return saved;
   let app = getApps().find((app) => app.name === name);
   if (!app) {
-    const token = sessionStorage.getItem(APP_CHECK_SESSION_KEY);
-    if (config.appCheckMode === "debug" && !token)
-      throw new Error(
-        "Register an App Check development token before testing email setup here.",
-      );
-    (
-      self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }
-    ).FIREBASE_APPCHECK_DEBUG_TOKEN =
-      config.appCheckMode === "debug" ? token! : false;
     app = initializeApp(config.firebase, name);
-    initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(
-        config.siteKey || "tab-brain-development",
-      ),
-      isTokenAutoRefreshEnabled: true,
-    });
   }
+  initializeBrowserAppCheck(app, config);
   const result = {
     auth: getAuth(app),
     functions: getFunctions(app, "us-central1"),

@@ -25,7 +25,7 @@ If verification fails, repeat from your regular desktop browser. The project own
 2. In **AI Logic → Get started**, configure the Gemini Developer API. Choose an available Gemini text model and enable AI Logic enforcement in **App Check**.
 3. For a public HTTPS website, register a score-based reCAPTCHA Enterprise key for its domain. Choose **reCAPTCHA Enterprise · web** in Tab Brain and enter the site key.
 4. For localhost or an unpacked extension, use **Registered development token · private test**. Register a token for your web app under **App Check → Apps → Manage debug tokens** and enter it in that browser session.
-5. Save the settings. Reload after changing the verification method or development token so the SDK starts with the new setting. Then choose **Verify connection** and send one approved sample comparison.
+5. Save the settings. If verification has already run and you change its credentials or method, Tab Brain reloads to apply the change. Then choose **Verify connection** and send one approved sample comparison.
 
 The hosted app and extension have separate libraries and settings. You can move a library with a backup. Keep development tokens out of source, screenshots, recordings, and public judging instructions. [Firebase’s private debug provider guide](https://firebase.google.com/docs/app-check/web/debug-provider).
 

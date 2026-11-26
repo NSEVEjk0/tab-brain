@@ -6,6 +6,8 @@
 
 [Public app](https://tab-brain-memory.vercel.app) · [Chrome download](https://tab-brain-memory.vercel.app/downloads/tab-brain-extension.zip) · [Public source](https://github.com/NSEVEjk0/tab-brain) · [Devpost rules](https://firebasehybridaihackathon.devpost.com/rules) · [FAQ](https://firebasehybridaihackathon.devpost.com/details/faqs)
 
+The 2:09 review cut shows working local inference and the November 18 cloud result. It also shows the current hosted App Check failure. Record a fresh successful comparison and publish the final cut on YouTube before submitting. [Review cut](https://tab-brain-demo-review.vercel.app) · [Current test results](validation.md)
+
 ## Show one research session
 
 Open several labelled sample articles in Chrome. Capture the tabs, close the saved ones, and find an exact phrase after going offline. Open a page with its Gemini Nano receipt. Then show what changes when the reader asks a question about several sources. They see the excerpts, choose what to send, and open a citation from a real cloud answer.

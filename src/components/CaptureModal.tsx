@@ -28,12 +28,11 @@ import { idleAIStatus, localTextStatus } from "../aiStatus";
 import { captureTargets, closePersistedTabs, extractTab } from "../extension";
 import type { CaptureTarget } from "../extension";
 import { putMemories } from "../db";
-import type { AIConfig, Collection, Memory } from "../types";
+import type { Collection, Memory } from "../types";
 
 export function CaptureModal({
   memories,
   collections,
-  config,
   scope = "all",
   tabId,
   onClose,
@@ -42,7 +41,6 @@ export function CaptureModal({
 }: {
   memories: Memory[];
   collections: Collection[];
-  config?: AIConfig;
   scope?: "all" | "current";
   tabId?: number;
   onClose: () => void;
@@ -91,7 +89,7 @@ export function CaptureModal({
     if (!local) return false;
     try {
       if (!localModelReady())
-        await initializeLocal(config, (value) =>
+        await initializeLocal((value) =>
           setPhase(`Preparing on-device model · ${Math.round(value * 100)}%`),
         );
       return true;
@@ -121,7 +119,7 @@ export function CaptureModal({
     });
     if (useLocal) {
       try {
-        const summarized = await summarizeLocally(memory, config);
+        const summarized = await summarizeLocally(memory);
         await putMemories([summarized]);
         memory = summarized;
       } catch (error) {
