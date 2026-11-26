@@ -13,13 +13,16 @@ import {
 } from "firebase/ai";
 import type { AIConfig, CloudPreview, Memory, ModelEvidence } from "./types";
 import { APP_CHECK_SESSION_KEY } from "./constants";
+import { FIREBASE_WEB_CONFIG } from "./firebaseConfig";
 import { excerpt, parseAnswer, sentences } from "./library";
 import { cloudModelName, idleAIStatus, publishAIStatus } from "./aiStatus";
 
 type Models = {
-  appCheck: ReturnType<typeof initializeAppCheck>;
   local: ReturnType<typeof getGenerativeModel>;
-  cloud: ReturnType<typeof getGenerativeModel>;
+  cloud?: {
+    appCheck: ReturnType<typeof initializeAppCheck>;
+    model: ReturnType<typeof getGenerativeModel>;
+  };
   key: string;
 };
 let models: Models | undefined;
@@ -96,13 +99,12 @@ function parseLocalSummary(response: {
   };
 }
 
-export function configureModels(config: AIConfig): Models {
-  const token = sessionStorage.getItem(APP_CHECK_SESSION_KEY) ?? "";
+export function configureModels(config?: AIConfig): Models {
+  const token =
+    config?.appCheckMode === "debug"
+      ? (sessionStorage.getItem(APP_CHECK_SESSION_KEY) ?? "")
+      : "";
   const key = JSON.stringify(config) + token;
-  if (config.appCheckMode === "debug" && !token)
-    throw new Error(
-      "Add your registered App Check development token in AI settings. It stays in this browser session.",
-    );
   if (models?.key === key) return models;
   if (configuredApp) {
     void deleteApp(configuredApp);
@@ -111,29 +113,26 @@ export function configureModels(config: AIConfig): Models {
   models = undefined;
   deviceReady = false;
   const app = initializeApp(
-    config.firebase,
+    config?.firebase ?? FIREBASE_WEB_CONFIG,
     `tab-brain-${crypto.randomUUID()}`,
   );
   configuredApp = app;
-  if (config.appCheckMode === "debug") {
+  let appCheck: ReturnType<typeof initializeAppCheck> | undefined;
+  // Chrome's device model can run before a cloud connection is configured.
+  if (config && (config.appCheckMode === "enterprise" || token)) {
     (
       self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }
-    ).FIREBASE_APPCHECK_DEBUG_TOKEN = token;
-  } else {
-    (
-      self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }
-    ).FIREBASE_APPCHECK_DEBUG_TOKEN = false;
+    ).FIREBASE_APPCHECK_DEBUG_TOKEN = token || false;
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(
+        config.siteKey || "tab-brain-development",
+      ),
+      isTokenAutoRefreshEnabled: true,
+    });
   }
-  const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaEnterpriseProvider(
-      config.siteKey || "tab-brain-development",
-    ),
-    isTokenAutoRefreshEnabled: true,
-  });
   const ai = getAI(app, { backend: new GoogleAIBackend() });
   models = {
     key,
-    appCheck,
     local: getGenerativeModel(ai, {
       mode: InferenceMode.ONLY_ON_DEVICE,
       onDeviceParams: {
@@ -150,25 +149,36 @@ export function configureModels(config: AIConfig): Models {
         },
       },
     }),
-    cloud: getGenerativeModel(ai, {
-      mode: InferenceMode.ONLY_IN_CLOUD,
-      inCloudParams: {
-        model: config.model,
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-          maxOutputTokens: 2600,
-        },
-        systemInstruction,
+    ...(appCheck && config && {
+      cloud: {
+        appCheck,
+        model: getGenerativeModel(ai, {
+          mode: InferenceMode.ONLY_IN_CLOUD,
+          inCloudParams: {
+            model: config.model,
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature: 0.2,
+              maxOutputTokens: 2600,
+            },
+            systemInstruction,
+          },
+        }),
       },
     }),
   };
   return models;
 }
 
-async function verifiedModels(config: AIConfig): Promise<Models> {
+async function verifiedModel(
+  config: AIConfig,
+): Promise<ReturnType<typeof getGenerativeModel>> {
   const current = configureModels(config);
-  const result = await getToken(current.appCheck);
+  if (!current.cloud)
+    throw new Error(
+      "Add your registered App Check development token in AI settings. It stays in this browser session.",
+    );
+  const result = await getToken(current.cloud.appCheck);
   if (models !== current)
     throw new Error(
       "The AI connection changed during browser verification. Review your sources and approve the request again.",
@@ -177,7 +187,7 @@ async function verifiedModels(config: AIConfig): Promise<Models> {
     throw new Error(
       "Firebase App Check returned no valid token. Verify the connection in Settings and try again.",
     );
-  return current;
+  return current.cloud.model;
 }
 
 export async function verifyConnection(config: AIConfig): Promise<void> {
@@ -189,7 +199,7 @@ export async function verifyConnection(config: AIConfig): Promise<void> {
       "Firebase App Check is verifying the registered browser connection.",
   });
   try {
-    await verifiedModels(config);
+    await verifiedModel(config);
     publishAIStatus({
       phase: "complete",
       location: "cloud",
@@ -211,7 +221,7 @@ export function localModelReady() {
   return deviceReady;
 }
 export async function initializeLocal(
-  config: AIConfig,
+  config: AIConfig | undefined,
   progress: (value: number) => void,
 ): Promise<void> {
   let current: Models | undefined;
@@ -282,7 +292,7 @@ export async function initializeLocal(
 }
 export async function summarizeLocally(
   memory: Memory,
-  config: AIConfig,
+  config?: AIConfig,
 ): Promise<Memory> {
   const { local } = configureModels(config);
   if (!deviceReady)
@@ -366,7 +376,7 @@ export async function askCloud(
       "Firebase App Check must verify this browser before the approved sources are sent.",
   });
   try {
-    const { cloud } = await verifiedModels(config);
+    const cloud = await verifiedModel(config);
     publishAIStatus({
       phase: "working",
       location: "cloud",

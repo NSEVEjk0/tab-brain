@@ -31,7 +31,6 @@ export function DetailModal({
   onClose,
   onUpdate,
   onDelete,
-  onConnect,
 }: {
   memory: Memory;
   collections: Collection[];
@@ -39,7 +38,6 @@ export function DetailModal({
   onClose: () => void;
   onUpdate: (memory: Memory) => Promise<void>;
   onDelete: () => Promise<void>;
-  onConnect: () => void;
 }) {
   const [tags, setTags] = useState(memory.tags.join(", "));
   const [selected, setSelected] = useState(memory.collectionIds);
@@ -49,10 +47,6 @@ export function DetailModal({
   const [message, setMessage] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   async function summarize() {
-    if (!config) {
-      onConnect();
-      return;
-    }
     setBusy(true);
     setError("");
     setMessage("Preparing local summary…");
@@ -163,7 +157,7 @@ export function DetailModal({
               ) : (
                 <Sparkles size={15} />
               )}{" "}
-              {config ? "Summarize locally" : "Set up local AI"}
+              Summarize locally
             </button>
           </div>
           <button

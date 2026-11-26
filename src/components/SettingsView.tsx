@@ -83,7 +83,6 @@ export function SettingsView({
     }
   }
   async function enable() {
-    if (!settings.ai) return;
     setBusy("local");
     setError("");
     setMessage("");
@@ -122,7 +121,7 @@ export function SettingsView({
         <div>
           <span className="eyebrow">MAKE YOURSELF AT HOME</span>
           <h1>Your space, your rules.</h1>
-          <p>Keep your memory local. Connect AI when you’re ready.</p>
+          <p>Manage your local library and cloud connection.</p>
         </div>
         <div className="title-stamp">
           <ShieldCheck size={25} />
@@ -142,8 +141,8 @@ export function SettingsView({
             <Cloud size={20} />
           </span>
           <div>
-            <h2>Connect your AI</h2>
-            <p>Local summaries and cloud answers use Firebase AI Logic.</p>
+            <h2>Connect Firebase for cloud comparisons</h2>
+            <p>App Check verifies the browser before approved excerpts go to Gemini.</p>
           </div>
           <span className={`status-pill ${settings.ai ? "configured" : ""}`}>
             {settings.ai ? "Configuration saved" : "Setup needed"}
@@ -183,8 +182,7 @@ export function SettingsView({
               Check.
             </li>
             <li>
-              Save the configuration below. On compatible desktop Chrome, enable
-              the local model after a click, then try a real capture.
+              Save the configuration below, then verify the connection.
             </li>
           </ol>
           <a
@@ -325,15 +323,15 @@ export function SettingsView({
           <span className="setting-icon green">
             <HardDrive size={22} />
           </span>
-          <h2>A model on your device</h2>
+          <h2>Summaries on your device</h2>
           <p>
-            On compatible desktop Chrome, download and initialize Gemini Nano.
-            Local capture uses the device only and never falls back to cloud.
+            On supported desktop Chrome, enable Gemini Nano to summarize saved
+            pages on this device.
           </p>
           <button
             className="button secondary"
             onClick={enable}
-            disabled={!settings.ai || Boolean(busy)}
+            disabled={Boolean(busy)}
           >
             {busy === "local" ? (
               <LoaderCircle size={16} className="spin" />

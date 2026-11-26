@@ -76,12 +76,6 @@ test("official Chrome produces a real Firebase device summary and recalls its or
   });
   try {
     await page.goto(`${origin}/#settings`);
-    await page
-      .getByLabel("reCAPTCHA Enterprise site key")
-      .fill("6Ld5hiYuAAAAAOjvIMyi8k0Rcf6ZG8Vi6avDAIU8");
-    await page
-      .getByRole("button", { name: "Save connection", exact: true })
-      .click();
     if (verifyCloud) {
       await page
         .getByRole("button", { name: "Verify connection", exact: true })
@@ -99,6 +93,10 @@ test("official Chrome produces a real Firebase device summary and recalls its or
         await verified.count(),
         JSON.stringify(report.browserVerification),
       ).toBe(1);
+    } else {
+      await expect(
+        page.getByRole("button", { name: "Verify connection", exact: true }),
+      ).toHaveCount(0);
     }
     await page
       .getByRole("button", { name: "Enable on-device AI", exact: true })

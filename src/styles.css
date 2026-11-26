@@ -2843,9 +2843,6 @@ progress::-webkit-progress-value {
   display: block;
   margin-top: 3px;
 }
-.disabled-option strong {
-  color: #99ab8d;
-}
 .capture-footer {
   display: flex;
   align-items: center;

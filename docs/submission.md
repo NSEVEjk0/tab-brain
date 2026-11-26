@@ -1,21 +1,31 @@
-# Firebase #BuildHybridAI submission notes
+# Firebase #BuildHybridAI 2026
 
-The intended demonstration is a research session with 15 mixed tabs: capture them locally, produce two-sentence summaries and three tags, save the records, close the saved tabs, recall a forgotten detail offline, and compare a few approved sources using cloud Gemini.
+- **Platform** Web / Chrome
+- **Deadline** November 30, 2026 at 22:00 UTC
+- **Judging access through** December 16, 2026 at 22:00 UTC
 
-The interface, local storage, extraction, offline recall, notes, reminders, source preview, model badge, and distribution are implemented and tested. The [public repository](https://github.com/NSEVEjk0/tab-brain) contains the Apache-2.0 license, setup instructions, and automated checks. The optional email service is prepared but disabled until a provider and Firebase backend are configured.
+[Public app](https://tab-brain-memory.vercel.app) · [Chrome download](https://tab-brain-memory.vercel.app/downloads/tab-brain-extension.zip) · [Public source](https://github.com/NSEVEjk0/tab-brain) · [Devpost rules](https://firebasehybridaihackathon.devpost.com/rules) · [FAQ](https://firebasehybridaihackathon.devpost.com/details/faqs)
 
-A real cloud request on November 18 passed App Check and returned a cited Gemini comparison of four approved sample sources. Correcting one character in the public reCAPTCHA key resolved that earlier verification failure. The November 20 automated browser was rejected by App Check before generation, so repeat the cloud check on the judging browser. On this 6 GB VPS, initial Chrome profiles reported Nano unavailable; a profile with component updates enabled offered a download but did not finish initialization. A Chromium API that only echoes input is not local inference. The standard public CI runner completed real Nano generation, stored its SDK-confirmed receipt, and recalled the original source offline. That proof and recording are preserved in [the verification record](validation.md). The final video still needs to demonstrate the approved cloud comparison in the same working flow; current automated production attestation remains blocked.
+## Show one research session
 
-The rules audit from November 17 records a deadline of **November 30, 2026, at 22:00 UTC**. The official FAQ requires both local and cloud inference through Firebase AI Logic, and App Check is required. A Chrome extension is eligible; a working single platform is sufficient. The public source needs an open-source license, runtime Firebase calls, and setup instructions. The demo video must be public on YouTube and no longer than three minutes. Judging access must stay free through December 16.
+Open several labelled sample articles in Chrome. Capture the tabs, close the saved ones, and find an exact phrase after going offline. Open a page with its Gemini Nano receipt. Then show what changes when the reader asks a question about several sources. They see the excerpts, choose what to send, and open a citation from a real cloud answer.
 
-Before submitting:
+| Time and screen | What to say |
+| --- | --- |
+| 0:00–0:18. Open the extension alongside a sample article. | I’m comparing a few tools for a project. One tab has the price and another has the part about offline editing. Tab Brain saves the text so I can close those tabs and still find the details later. |
+| 0:18–0:47. Choose the tabs, save them, then close the saved tabs. | I pick the tabs I want. Tab Brain saves the readable text and the original links before offering to close anything. I can keep a tab open by pinning it. |
+| 0:47–1:12. Show a saved page's summary, tags, and on-device receipt. | Firebase AI Logic runs Gemini Nano in Chrome. It adds two sentences and three tags, and the original text stays in my library. The receipt shows where the summary ran. |
+| 1:12–1:35. Disconnect, reload, and search for an exact phrase. | I can still find the phrase I remember without a connection. I’ll open the saved passage and leave myself a note. |
+| 1:35–2:25. Reconnect, review excerpts, approve, and open a source citation from a real answer. | Now I want to compare the tools. I can see exactly which excerpts will go to Gemini and remove a source first. Firebase App Check verifies the browser, then AI Logic sends the approved question and excerpts. I can open the page behind a claim from its numbered citation. |
+| 2:25–2:40. Download the brief and return to the library. | The brief keeps the answer and its source links. I can close the tabs and still pick up the research where I left off. |
 
-- Use the verified Nano receipt and recording as local-inference evidence. Repeat the cloud comparison on a browser accepted by production App Check and record both execution locations in the final workflow.
-- Check that the public repository and free judging app remain accessible. The extension and complete source can also be downloaded from the app.
-- Record a real capture → declutter → offline recall → approved cloud comparison using owned or authorized source pages. Clearly identify any sample fixtures.
-- Record and upload a public English demo video of at most three minutes; do not show secrets or private data.
-- Complete the Devpost submission yourself, confirm personal/team eligibility, and keep the judging project available. No submission or external message is sent automatically.
+Label footage from separate runs or surfaces, including when switching from the extension to the website. Use a successful cloud response for the final recording. For on-device inference, show the saved model receipt and the original article text. [Verification record](validation.md) · [Devpost demo guidance](https://info.devpost.com/blog/6-tips-for-making-a-hackathon-demo-video).
 
-Suggested 2:45 video sequence: 0:00–0:25 cluttered research session and the forgotten-detail problem; 0:25–1:10 real local capture and safely closing saved tabs; 1:10–1:35 offline recall; 1:35–2:25 exact preview and a real cited Firebase cloud comparison; 2:25–2:45 architecture, privacy boundaries, and the use case.
+## Complete the Devpost entry
 
-Sources: https://firebasehybridaihackathon.devpost.com/rules and https://firebasehybridaihackathon.devpost.com/details/faqs.
+1. Select **Web / Chrome** and enter the public repository, hosted app, and English demo video. Set the YouTube video to **Public** and keep it under three minutes.
+2. Describe the lost detail in an open-tab research session, what Tab Brain saves, and how Firebase AI Logic keeps local summaries separate from approved cloud comparisons.
+3. Add the team members and the setup steps judges need. If reusing work from before November 11, identify what was carried forward and what changed during the event.
+4. Verify the public site, download, and live model workflow before submitting. Keep testing access free through the end of judging.
+
+After November 11 the project added the Chrome side panel and local library, persisted source capture, offline recall, Firebase AI Logic in device-only and cloud-only modes, source approval, research brief exports, and reminders. The repository’s first public commit is dated November 18. [Repository history](https://github.com/NSEVEjk0/tab-brain/commits/main/) · [Try the app](testing-the-app.md).

@@ -1,5 +1,7 @@
 # What we checked
 
+On November 26, the public site served the extension and source bundles, both downloads matched their published checksums, and both production browser checks passed. In a headed Google Chrome session, Firebase App Check returned HTTP 403 `App attestation failed` before the app sent source text. The record below includes the successful November 18 cloud run and November 20 device run. Test public cloud access from a regular desktop browser as described in [Firebase setup](firebase-setup.md).
+
 Updated on November 20, 2026, using Node 24 for the app, Node 22 for the email backend, Chromium for interface checks, and official Google Chrome 158 for the current real-model probe. The public app is at https://tab-brain-memory.vercel.app. Historical service results retain their original dates below.
 
 | Check                                         | Result                                                                                                                                                                                                                                                                          |

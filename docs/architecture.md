@@ -30,7 +30,7 @@ The email branch is optional and disabled on the public deployment until the sen
 
 ## The two AI operations
 
-The capture model is created with `InferenceMode.ONLY_ON_DEVICE`. A button starts the device model so Chrome receives a user interaction for initialization. After a response, the app checks `InferenceSource.ON_DEVICE`, validates the summary structure, and keeps only excerpts found verbatim in the saved text. Unsupported devices keep readable excerpts. There is no automatic cloud fallback for a local capture.
+The capture model uses `InferenceMode.ONLY_ON_DEVICE` and can run before a user connects a cloud project. A button gives Chrome the user interaction it needs to initialize the device model. The app checks `InferenceSource.ON_DEVICE`, validates the summary structure, and keeps excerpts found verbatim in the saved text. Unsupported devices save readable excerpts.
 
 Comparisons use a separate `InferenceMode.ONLY_IN_CLOUD` model. Local search selects candidate memories. The preview contains their titles, URLs, capture dates, short summaries, and relevant excerpts. You can remove a source before sending. The send operation uses an immutable copy of the reviewed payload and checks that it matches the approved request. It obtains an App Check token before invoking the model. If browser verification fails, the source text stays local. Settings can verify App Check separately without generating an answer.
 

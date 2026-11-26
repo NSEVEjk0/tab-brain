@@ -92,10 +92,26 @@ describe("explicit Firebase inference boundaries (SDK mocked)", () => {
     expect(mocks.localGenerate).not.toHaveBeenCalled();
     expect(mocks.cloudGenerate).not.toHaveBeenCalled();
   });
-  it("refuses to initialize an unregistered development configuration without its session token", () => {
+  it.each([undefined, config])(
+    "runs local summaries without a cloud connection (%s)",
+    async (localConfig) => {
+      tokens.clear();
+      await ai.initializeLocal(localConfig, () => undefined);
+      const saved = await ai.summarizeLocally(memory(), localConfig);
+      expect(saved.modelEvidence?.inferenceSource).toBe("on-device");
+      expect(mocks.appCheck).not.toHaveBeenCalled();
+      expect(mocks.getToken).not.toHaveBeenCalled();
+      expect(mocks.cloudGenerate).not.toHaveBeenCalled();
+    },
+  );
+  it("requires a registered session token before a development cloud request", async () => {
     tokens.clear();
-    expect(() => ai.configureModels(config)).toThrow("development token");
-    expect(mocks.getAI).not.toHaveBeenCalled();
+    const preview = previewCloud("Question", [memory()]);
+    await expect(
+      ai.askCloud(preview, config, preview.requestText),
+    ).rejects.toThrow("development token");
+    expect(mocks.getToken).not.toHaveBeenCalled();
+    expect(mocks.cloudGenerate).not.toHaveBeenCalled();
   });
   it("blocks cloud inference if the payload differs from the reviewed request", async () => {
     const preview = previewCloud("Question", [memory()]);

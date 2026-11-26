@@ -88,7 +88,7 @@ export function CaptureModal({
     };
   }, [scope, tabId]);
   async function prepareLocal(): Promise<boolean> {
-    if (!local || !config) return false;
+    if (!local) return false;
     try {
       if (!localModelReady())
         await initializeLocal(config, (value) =>
@@ -119,7 +119,7 @@ export function CaptureModal({
       title: "A page remembered",
       detail: memory.title,
     });
-    if (useLocal && config) {
+    if (useLocal) {
       try {
         const summarized = await summarizeLocally(memory, config);
         await putMemories([summarized]);
@@ -417,25 +417,19 @@ export function CaptureModal({
                 ))}
               </select>
             </label>
-            <label
-              className={`local-capture-option ${!config ? "disabled-option" : ""}`}
-            >
+            <label className="local-capture-option">
               <input
                 type="checkbox"
                 checked={local}
                 onChange={(e) => setLocal(e.target.checked)}
-                disabled={!config || busy}
+                disabled={busy}
               />
               <div>
                 <strong>
                   <Sparkles size={14} />
                   Summarize with on-device AI
                 </strong>
-                <small>
-                  {config
-                    ? "Device only. No cloud fallback."
-                    : "Connect Firebase in settings to enable local AI."}
-                </small>
+                <small>Runs on supported desktop Chrome.</small>
               </div>
             </label>
           </div>

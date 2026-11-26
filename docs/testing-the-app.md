@@ -2,6 +2,13 @@
 
 Open [Tab Brain](https://tab-brain-memory.vercel.app) in your regular browser. On a phone, the menu button opens navigation.
 
+## Try both Firebase models
+
+1. In [supported desktop Chrome](https://developer.chrome.com/docs/ai/get-started), open **Settings & backups → Enable on-device AI**. Let Chrome finish the first model download.
+2. Save a page or choose **Summarize locally** on an existing one. Open the page and find the **Gemini Nano · on device** receipt next to its summary and tags.
+3. Disconnect and reload. Search for a phrase from the original text and open the saved passage.
+4. Reconnect and follow the cloud comparison steps below. The completed answer has its own cloud model receipt.
+
 ## Check the cloud comparison
 
 1. Open **Settings & backups** and tap **Verify connection**. Look for **Firebase verified this browser**.
@@ -43,4 +50,4 @@ You can also choose bookmarks for a reading brief, preview its exact copy, and d
 
 [Install the extension](get-started.md#install-the-chrome-extension), open two articles, and open Tab Brain's side panel. Choose **Snap all open tabs**, select the two pages, and save them. Read the save receipt, then choose **Close saved tabs**. Search for a detail from the captured reading in the extension library.
 
-[Firebase setup](firebase-setup.md) covers the separate desktop workflow for local AI summaries.
+[Firebase setup](firebase-setup.md) covers desktop model support and the extension's optional cloud connection.

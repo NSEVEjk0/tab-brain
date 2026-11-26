@@ -1193,10 +1193,6 @@ export default function App() {
             await refresh();
             notify("Memory removed from this device.");
           }}
-          onConnect={() => {
-            setDetailId(undefined);
-            navigate("settings");
-          }}
         />
       )}{" "}
       {install && <InstallModal onClose={() => setInstall(false)} />}

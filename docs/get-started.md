@@ -18,7 +18,7 @@ Use desktop Chrome 139 or newer.
 
 The shortcuts are `Ctrl+Shift+Y` to open the panel and `Ctrl+Shift+S` to queue the current page for capture. Use `Command` on macOS. Confirm the capture in the panel.
 
-The extension has its own local library. You can move pages from the website with a backup. For extension AI testing, follow [Firebase setup](firebase-setup.md) to register and enter the private App Check development token in that browser session.
+The extension has its own local library. You can move pages from the website with a backup. Enable Gemini Nano on supported desktop Chrome for local summaries. To use cloud comparisons in the unpacked extension, follow [Firebase setup](firebase-setup.md) for a private App Check development token.
 
 ## Run the source locally
 
