@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-28T09:04:03.379Z",
+  "checkedAt": "2026-11-28T09:24:17.033Z",
   "url": "https://tab-brain-memory.vercel.app",
   "appCheck": [
     {
@@ -14,5 +14,11 @@
   "verificationMessage": "Firebase App Check rejected this browser (403). Reload in a regular Chrome window and try again. If it still fails, the project owner can check the site registration and App Check metrics.",
   "comparisonSucceeded": false,
   "comparisonMessage": "Firebase App Check rejected this browser (403). Reload in a regular Chrome window and try again. If it still fails, the project owner can check the site registration and App Check metrics.",
-  "browser": "Google Chrome 158, fresh headed VPS profile"
+  "browser": "Google Chrome 158, fresh headed VPS profile",
+  "testedCommit": "c5fbca7",
+  "independentBrowserCheck": {
+    "browser": "Google Chrome 158 on GitHub Actions",
+    "verified": false,
+    "run": "https://github.com/NSEVEjk0/tab-brain/actions/runs/46130156559"
+  }
 }

@@ -12,7 +12,7 @@ Tab Brain is for people who research in Chrome and end up keeping tabs open for 
 
 For summaries and tags, Tab Brain uses Firebase AI Logic with Gemini Nano and device-only inference. For comparisons, it uses a cloud Gemini model through the same SDK. The reader selects the excerpts, sees what will go to Gemini, and approves the request. Firebase App Check verifies the browser. Each answer links back to its sources, and notes stay on the reader’s device.
 
-During the submission period, the project added the Chrome side panel, local library, safe tab capture and close, offline recall, both Firebase AI Logic paths, source approval, cited brief exports, and reminders. The first public commit was November 18. Identify any pre-existing code in the Devpost description if applicable. [Repository history](https://github.com/NSEVEjk0/tab-brain/commits/main/)
+During the submission period, the project added the Chrome side panel, local library, safe tab capture and close, offline recall, both Firebase AI Logic paths, source approval, cited brief exports, and reminders. On November 28, the project updated the workspace, fixed light-mode contrast and the mobile header, and verified the hosted downloads and the Gemma 4 device path. The first public commit was November 18. Identify any pre-existing code in the Devpost description if applicable. [Repository history](https://github.com/NSEVEjk0/tab-brain/commits/main/)
 
 ## Entry materials
 
@@ -23,7 +23,7 @@ During the submission period, the project added the Chrome side panel, local lib
 | Chrome extension | [Download ZIP](https://tab-brain-memory.vercel.app/downloads/tab-brain-extension.zip) · [Install instructions](get-started.md#install-the-chrome-extension) |
 | Testing instructions | [Try Tab Brain](testing-the-app.md) · [Current verification](validation.md#november-28-release-checks) |
 | Images | [Desktop library](images/workspace-desktop.png) · [Mobile library](images/workspace-mobile.png) |
-| Demo video | [Video and upload files](https://tab-brain-demo-review.vercel.app/). The Devpost entry needs the public YouTube URL. |
+| Demo video | [Two-minute English demo and captions](https://tab-brain-demo-review.vercel.app/). The video shows the verified November 18 cloud output and today’s hosted verification failure. Devpost needs its public YouTube URL. |
 
 Firebase asks for a practical use of both inference modes and explicitly allows choosing a mode per feature. The four equally weighted judging criteria are technical implementation, design, impact, and quality of the idea. Firebase’s build-session advice is to show the audience, problem, and working hybrid features in the first 30 seconds. [Organizer FAQ](https://firebasehybridaihackathon.devpost.com/details/faqs) · [Judging criteria](https://firebasehybridaihackathon.devpost.com/rules)
 

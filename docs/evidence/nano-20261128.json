@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-11-28T09:22:37.668Z",
+  "browser": "Google Chrome 158.0.8127.36",
+  "input": "authored test page; no personal data",
+  "requestedModelVersion": "Gemma 4 for Built-in AI",
+  "initialization": {
+    "ready": true,
+    "errors": []
+  },
+  "savedResult": {
+    "summary": "This resource allows users to keep cobalt-violet details offline for research, offering a library that saves original text and private notes on the device. Pages can be organized into collections and searched later, with cloud comparisons using approved source snippets.",
+    "tags": [
+      "offline research",
+      "reading library",
+      "source snippets"
+    ],
+    "modelEvidence": {
+      "name": "Gemini Nano",
+      "inferenceSource": "on-device",
+      "verifiedAt": "2026-11-28T09:25:49.193Z"
+    },
+    "originalTextRetained": true
+  },
+  "cloudGenerationRequests": [],
+  "offlineRecall": true,
+  "devicePassed": true,
+  "run": "https://github.com/NSEVEjk0/tab-brain/actions/runs/46130156559",
+  "testedCommit": "c5fbca7"
+}
