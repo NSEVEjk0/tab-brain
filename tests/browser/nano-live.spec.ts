@@ -30,6 +30,7 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     checkedAt: new Date().toISOString(),
     browser: version,
     input: "authored test page; no personal data",
+    requestedModelVersion: "Gemma 4 for Built-in AI",
     cloudGenerationRequests: [],
   };
   if (existsSync("/proc/meminfo"))
@@ -53,7 +54,8 @@ test("official Chrome produces a real Firebase device summary and recalls its or
       `--user-data-dir=${profile}`,
       "--remote-debugging-pipe",
       "--component-updater=fast-update",
-      "--enable-features=OptimizationGuideManifestBroker,OnDeviceModelForceCpuBackend",
+      // These are the switches chrome://flags applies for Gemma 4, plus the CPU backend.
+      "--enable-features=AIApiFoundationalModel:model_version/v4,OptimizationGuideManifestBroker,OnDeviceModelForceCpuBackend",
     ],
     viewport: { width: 1440, height: 1000 },
     recordVideo: {
@@ -62,9 +64,6 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     },
   });
   const page = await context.newPage();
-  const origin = verifyCloud
-    ? "https://tab-brain-memory.vercel.app"
-    : "http://127.0.0.1:4173";
   const cloudRequests: string[] = [];
   page.on("request", (request) => {
     if (
@@ -75,34 +74,20 @@ test("official Chrome produces a real Firebase device summary and recalls its or
       cloudRequests.push(request.method());
   });
   try {
-    await page.goto(`${origin}/#settings`);
-    if (verifyCloud) {
-      await page
-        .getByRole("button", { name: "Verify connection", exact: true })
-        .click();
-      const verified = page.getByText(
-        "Firebase verified this browser. You can now approve a cloud question to test the model.",
-        { exact: true },
-      );
-      await verified.or(page.getByRole("alert")).waitFor({ timeout: 60_000 });
-      report.browserVerification = {
-        success: (await verified.count()) > 0,
-        errors: await page.getByRole("alert").allTextContents(),
-      };
-      expect(
-        await verified.count(),
-        JSON.stringify(report.browserVerification),
-      ).toBe(1);
-    } else {
-      await expect(
-        page.getByRole("button", { name: "Verify connection", exact: true }),
-      ).toHaveCount(0);
-    }
+    await page.goto("chrome://flags/#gemma4-for-built-in-ai");
+    await expect(
+      page.locator("flags-experiment#gemma4-for-built-in-ai"),
+      "This Chrome release must support the Gemma 4 flag.",
+    ).toBeAttached();
+    await page.goto("http://127.0.0.1:4173/#settings?panel=on-device");
+    await expect(
+      page.getByRole("button", { name: "Verify connection", exact: true }),
+    ).toHaveCount(0);
     await page
       .getByRole("button", { name: "Enable on-device AI", exact: true })
       .click();
     const ready = page.getByText(
-      "The on-device model is ready in this browser. New page summaries can now run locally.",
+      "Gemini Nano is ready to summarize saved pages in this browser.",
       { exact: true },
     );
     await ready.or(page.getByRole("alert")).waitFor({ timeout: 540_000 });
@@ -168,8 +153,27 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     expect(cloudRequests).toHaveLength(0);
     report.cloudGenerationRequests = cloudRequests;
     report.offlineRecall = true;
+    report.devicePassed = true;
+    await page.screenshot({ path: path.join(output, "workspace.png") });
     if (verifyCloud) {
       await context.setOffline(false);
+      await page.goto("https://tab-brain-memory.vercel.app/#settings");
+      await page
+        .getByRole("button", { name: "Verify connection", exact: true })
+        .click();
+      const verified = page.getByText(
+        "Firebase verified this browser. You can now approve a cloud question to test the model.",
+        { exact: true },
+      );
+      await verified.or(page.getByRole("alert")).waitFor({ timeout: 60_000 });
+      report.browserVerification = {
+        success: (await verified.count()) > 0,
+        errors: await page.getByRole("alert").allTextContents(),
+      };
+      expect(
+        await verified.count(),
+        JSON.stringify(report.browserVerification),
+      ).toBe(1);
       await page.locator(".ask-nav").click();
       await page
         .getByRole("button", { name: "Compare my research tools", exact: true })
@@ -198,7 +202,7 @@ test("official Chrome produces a real Firebase device summary and recalls its or
     report.passed = true;
   } finally {
     await page
-      .screenshot({ path: path.join(output, "workspace.png") })
+      .screenshot({ path: path.join(output, verifyCloud ? "last-step.png" : "workspace.png") })
       .catch(() => {});
     await writeFile(
       path.join(output, "result.json"),

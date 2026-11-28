@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   Check,
@@ -61,7 +61,17 @@ export function SettingsView({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<"local" | "verify" | "save">();
   const [progress, setProgress] = useState(0);
+  const [localFeedback, setLocalFeedback] = useState<{
+    text: string;
+    error?: boolean;
+  }>();
   const [confirmClear, setConfirmClear] = useState(false);
+  const localPanel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (location.hash === "#settings?panel=on-device") {
+      localPanel.current?.focus();
+    }
+  }, []);
   async function save(event: React.FormEvent) {
     event.preventDefault();
     setBusy("save");
@@ -102,16 +112,15 @@ export function SettingsView({
   }
   async function enable() {
     setBusy("local");
-    setError("");
-    setMessage("");
+    setLocalFeedback(undefined);
     setProgress(0);
     try {
       await initializeLocal(setProgress);
-      setMessage(
-        "The on-device model is ready in this browser. New page summaries can now run locally.",
-      );
+      setLocalFeedback({
+        text: "Gemini Nano is ready to summarize saved pages in this browser.",
+      });
     } catch (error) {
-      setError(friendlyError(error));
+      setLocalFeedback({ text: friendlyError(error), error: true });
     } finally {
       setBusy(undefined);
     }
@@ -136,8 +145,7 @@ export function SettingsView({
     <div className="settings-view">
       <div className="page-title-row">
         <div>
-          <span className="eyebrow">MAKE YOURSELF AT HOME</span>
-          <h1>Your space, your rules.</h1>
+          <h1>Settings &amp; backups</h1>
           <p>Manage your local library and cloud connection.</p>
         </div>
         <div className="title-stamp">
@@ -329,14 +337,20 @@ export function SettingsView({
         )}
       </section>
       <div className="settings-pair">
-        <section className="settings-panel">
+        <section
+          className="settings-panel"
+          ref={localPanel}
+          tabIndex={-1}
+          aria-labelledby="on-device-settings-title"
+        >
           <span className="setting-icon green">
             <HardDrive size={22} />
           </span>
-          <h2>Summaries on your device</h2>
+          <h2 id="on-device-settings-title">Summaries on your device</h2>
           <p>
-            On supported desktop Chrome, enable Gemini Nano to summarize saved
-            pages on this device.
+            On supported desktop Chrome, turn on Gemma 4 for Built-in AI in
+            Chrome flags, then enable summaries here. Chrome may need to download
+            the model the first time.
           </p>
           <button
             className="button secondary"
@@ -352,6 +366,14 @@ export function SettingsView({
               ? `Preparing model${progress ? ` · ${Math.round(progress * 100)}%` : "…"}`
               : "Enable on-device AI"}
           </button>
+          {localFeedback && (
+            <p
+              className={localFeedback.error ? "inline-error" : "inline-success"}
+              role={localFeedback.error ? "alert" : "status"}
+            >
+              {localFeedback.text}
+            </p>
+          )}
           <a
             className="text-link"
             href="https://developer.chrome.com/docs/ai/get-started"
@@ -365,7 +387,7 @@ export function SettingsView({
           <span className="setting-icon">
             <Download size={22} />
           </span>
-          <h2>A portable little library</h2>
+          <h2>Library backups</h2>
           <p>
             Back up your sources, text, tags, and collections. Import them into
             another browser or the extension whenever you need.
@@ -388,7 +410,7 @@ export function SettingsView({
       </div>
       <section className="settings-panel sample-settings">
         <div>
-          <h2>Make room for your own ideas</h2>
+          <h2>Example pages</h2>
           <p>
             {sampleCount
               ? `${sampleCount} authored example pages are in this library. Their summaries and tool prices are sample data.`

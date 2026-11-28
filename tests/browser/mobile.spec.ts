@@ -57,7 +57,7 @@ test("the mobile workspace, navigation, capture and source review fit a narrow s
     .getByRole("button", { name: "Settings & backups" })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Your space, your rules." }),
+    page.getByRole("heading", { name: "Settings & backups" }),
   ).toBeVisible();
   expect(
     await page.evaluate(

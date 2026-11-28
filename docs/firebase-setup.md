@@ -4,7 +4,7 @@ Tab Brain uses one Firebase AI Logic model in Chrome for summaries and a second 
 
 ## Summarize a page on this device
 
-1. Open the website or extension in [supported desktop Chrome](https://developer.chrome.com/docs/ai/get-started). Check the [Firebase Prompt API setup](https://firebase.google.com/docs/ai-logic/hybrid/web/get-started) for the Chrome version, flags, and model download.
+1. Open the website or extension in a recent version of [supported desktop Chrome](https://developer.chrome.com/docs/ai/get-started). For Gemini Nano 4, open `chrome://flags/#gemma4-for-built-in-ai`, enable **Gemma 4 for Built-in AI**, and relaunch Chrome. Check the [Firebase Prompt API setup](https://firebase.google.com/docs/ai-logic/hybrid/web/get-started) for model download requirements.
 2. Open **Settings & backups** and select **Enable on-device AI**. The first setup can take several minutes while Chrome downloads its model.
 3. Save a readable page with **Summarize with on-device AI** selected, or open an existing page and choose **Summarize locally**.
 4. Open the page to see its two-sentence summary, three tags, and the **Gemini Nano · on device** receipt. Use search to find a phrase from its original text.

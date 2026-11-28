@@ -1,23 +1,25 @@
 # Try Tab Brain
 
-Open [Tab Brain](https://tab-brain-memory.vercel.app) in your regular browser. On a phone, the menu button opens navigation.
+Open [Tab Brain](https://tab-brain-memory.vercel.app) in regular desktop Chrome. The hosted library and sample pages open without an account. On a phone you can use the web library, and the menu button opens navigation.
 
 ## Try both Firebase models
 
-1. In [supported desktop Chrome](https://developer.chrome.com/docs/ai/get-started), open **Settings & backups → Enable on-device AI**. Let Chrome finish the first model download.
-2. Save a page or choose **Summarize locally** on an existing one. Open the page and find the **Gemini Nano · on device** receipt next to its summary and tags.
-3. Disconnect and reload. Search for a phrase from the original text and open the saved passage.
+1. In [supported desktop Chrome](https://developer.chrome.com/docs/ai/get-started), enable **Gemma 4 for Built-in AI** in `chrome://flags/#gemma4-for-built-in-ai` and relaunch Chrome. From the library, choose **Summarize on your device → Enable on-device AI**. Let Chrome finish the first model download.
+2. Open the sample **Folio: lightweight knowledge management**, then choose **Summarize locally**. Check the **Gemini Nano · on device** receipt next to the summary and three tags.
+3. Disconnect from the internet or put the tab offline, then reload. Search for `full offline editing` and open the saved Folio passage.
 4. Reconnect and follow the cloud comparison steps below. The completed answer has its own cloud model receipt.
 
 ## Check the cloud comparison
 
 1. Open **Settings & backups** and tap **Verify connection**. Look for **Firebase verified this browser**.
-2. Open **Ask my tabs** and choose **Compare my research tools**.
+2. Choose **Compare saved sources** from the library, or open **Ask my tabs** from the sidebar. Choose **Compare my research tools**.
 3. Review the four labelled example sources. Try removing one source and watch the preview update, then include the sources you want.
 4. Choose **Approve & send to Gemini**. Watch the cloud model badge and read the completed answer.
 5. Follow a numbered source link, then return and download the research brief.
 
 The example tool names, features, and prices belong to the labelled demonstration pages. You can repeat the same flow with your own saved sources.
+
+If App Check rejects the browser, the approved excerpts stay on the device and the app reports the failure. [Latest hosted check](validation.md#november-28-release-checks)
 
 ## Save and find your own reading
 

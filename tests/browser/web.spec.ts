@@ -18,7 +18,7 @@ test("the authored sample workspace loads, persists, and recalls original detail
   await page.goto("/");
   await expect(page.locator(".memory-card")).toHaveCount(15);
   await expect(
-    page.getByText("A sample of what your memory could look like."),
+    page.getByText("Example pages are included in this library."),
   ).toBeVisible();
   await expect(page.locator(".stats-privacy")).toContainText("0");
   await page.evaluate(async () => {
@@ -562,17 +562,22 @@ test("hash navigation and browser back return to the correct workspace view", as
   page,
 }) => {
   await page.goto("/");
-  await page.locator(".ask-nav").click();
+  await page.getByRole("link", { name: /Summarize on your device/ }).click();
+  const localPanel = page.getByRole("region", { name: "Summaries on your device" });
+  await expect(localPanel).toBeFocused();
+  await expect(localPanel.getByRole("button", { name: "Enable on-device AI" })).toBeVisible();
+  await page.goBack();
+  await page.getByRole("button", { name: /Compare saved sources/ }).click();
   await expect(
-    page.getByRole("heading", { name: "Let your tabs talk to each other." }),
+    page.getByRole("heading", { name: "Ask my tabs" }),
   ).toBeVisible();
   await page.goto("/#settings");
   await expect(
-    page.getByRole("heading", { name: "Your space, your rules." }),
+    page.getByRole("heading", { name: "Settings & backups" }),
   ).toBeVisible();
   await page.goBack();
   await expect(
-    page.getByRole("heading", { name: "Let your tabs talk to each other." }),
+    page.getByRole("heading", { name: "Ask my tabs" }),
   ).toBeVisible();
   await page
     .getByRole("navigation", { name: "Collections" })

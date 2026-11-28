@@ -21,6 +21,7 @@ import {
   Menu,
   Network,
   Plus,
+  ScanSearch,
   Search,
   Settings2,
   ShieldCheck,
@@ -28,7 +29,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { BrandMark, MiniOrb } from "./components/Brand";
+import { BrandMark } from "./components/Brand";
 import { MemoryCard } from "./components/MemoryCard";
 import { TopicMap } from "./components/TopicMap";
 import { Modal } from "./components/Modal";
@@ -405,11 +406,11 @@ export default function App() {
   }
   const libraryTitle =
     nav === "favorites"
-      ? "The ones you keep coming back to."
+      ? "Favorites"
       : nav === "recent"
-        ? "Fresh in your memory."
+        ? "Recently saved"
         : nav === "archive"
-          ? "Put away, never forgotten."
+          ? "Archive"
           : currentCollection
             ? currentCollection.name
             : "";
@@ -434,21 +435,22 @@ export default function App() {
           </span>
           <span>
             tab<span className="brand-light">brain</span>
-            <sup>®</sup>
           </span>
         </button>
         <button
           className="workspace-picker"
           onClick={() => navigate("settings")}
         >
-          <span className="workspace-avatar">Y</span>
+          <span className="workspace-avatar">
+            <HardDrive size={15} />
+          </span>
           <span>
-            <strong>Your little workspace</strong>
-            <small>Personal · on this device</small>
+            <strong>Personal library</strong>
+            <small>Stored on this device</small>
           </span>
           <ChevronDown size={13} />
         </button>
-        <span className="nav-label">YOUR SPACE</span>
+        <span className="nav-label">LIBRARY</span>
         <nav aria-label="Main navigation">
           <button
             className={`nav-item ${nav === "all" ? "active" : ""}`}
@@ -487,7 +489,6 @@ export default function App() {
           >
             <Sparkles size={17} />
             <span>Ask my tabs</span>
-            <span className="nav-new">AI</span>
           </button>
         </nav>
         <div className="nav-label label-with-action">
@@ -550,14 +551,11 @@ export default function App() {
             <span className="privacy-symbol">
               <ShieldCheck size={19} />
             </span>
-            <strong>Yours to keep.</strong>
+            <strong>On this device</strong>
             <p>
-              Your memories live on this device. Your curiosity stays yours.
+              Saved pages and notes work offline. You choose which excerpts to
+              send to Gemini.
             </p>
-            <span className="local-indicator">
-              <i />
-              Stored locally
-            </span>
           </div>
           <nav aria-label="More navigation">
             <button
@@ -575,20 +573,6 @@ export default function App() {
               <span>Settings & backups</span>
             </button>
           </nav>
-          <div className="sidebar-footer">
-            <span className="profile-avatar">you</span>
-            <span>
-              <strong>Personal workspace</strong>
-              <small>A little more headspace.</small>
-            </span>
-            <button
-              className="icon-button"
-              aria-label="Open settings"
-              onClick={() => navigate("settings")}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
         </div>
       </aside>
       <div className="workspace">
@@ -664,7 +648,7 @@ export default function App() {
             <div className="initial-loading">
               <BrandMark />
               <LoaderCircle size={22} className="spin" />
-              <p>Making a little room for your ideas…</p>
+              <p>Opening your library…</p>
             </div>
           ) : nav === "ask" ? (
             <AskView
@@ -706,80 +690,67 @@ export default function App() {
               {nav === "all" && !query && !tag ? (
                 <section className="welcome-banner">
                   <div className="hero-copy">
-                    <span className="hero-eyebrow">
-                      <span className="tiny-star">✳</span>LESS CLUTTER. MORE
-                      HEADSPACE.
-                    </span>
                     <h1>
-                      A little space for
+                      Close the tabs.
                       <br />
-                      everything you <em>find.</em>
+                      Keep the <em>details.</em>
                     </h1>
                     <p>
-                      {isExtension ? (
-                        <>
-                          Save the pages you need. Close the saved tabs.
-                          <br className="narrow-break" /> Find the useful part
-                          again.
-                        </>
-                      ) : (
-                        <>
-                          Save page text and your own notes.
-                          <br className="narrow-break" /> Find them again, even
-                          offline.
-                        </>
-                      )}
+                      Save readable pages and notes. Find the passage you need
+                      again, even offline.
                     </p>
                     <div className="hero-actions">
                       <button
-                        className="button dark"
+                        className="button hero-save"
                         onClick={() => setCapture({ scope: "all" })}
                       >
                         {isExtension ? <Layers size={16} /> : <Plus size={16} />}
                         {isExtension ? "Snap all open tabs" : "Save a page"}
-                        <span className="button-shortcut">↗</span>
                       </button>
-                      <button
-                        className="hero-ask"
-                        onClick={() => navigate("ask")}
-                      >
-                        Ask my tabs <ArrowUpRight size={15} />
-                      </button>
+                      {isExtension && (
+                        <button
+                          className="hero-ask"
+                          onClick={() => navigate("ask")}
+                        >
+                          Ask my tabs <ArrowUpRight size={15} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <div className="hero-art">
-                    <MiniOrb />
-                    <span className="hero-art-caption">
-                      <i />
-                      GOOD IDEAS, IN GOOD COMPANY.
-                    </span>
-                  </div>
+                  {!isExtension && (
+                    <div className="hero-tools" role="group" aria-label="Firebase AI Logic">
+                      <span className="hero-tools-label">Firebase AI Logic</span>
+                      <a className="hero-tool" href="#settings?panel=on-device">
+                        <span className="hero-tool-icon"><HardDrive size={19} /></span>
+                        <span>
+                          <strong>Summarize on your device</strong>
+                          <small>Gemini Nano in Chrome</small>
+                        </span>
+                        <ChevronRight size={17} aria-hidden="true" />
+                      </a>
+                      <button
+                        className="hero-tool hero-tool-cloud"
+                        onClick={() => navigate("ask")}
+                      >
+                        <span className="hero-tool-icon"><Cloud size={19} /></span>
+                        <span>
+                          <strong>Compare saved sources</strong>
+                          <small>Cloud Gemini with your approval</small>
+                        </span>
+                        <ChevronRight size={17} aria-hidden="true" />
+                      </button>
+                    </div>
+                  )}
                 </section>
               ) : (
                 <div className="library-page-title">
-                  <span className="eyebrow">
-                    {currentCollection
-                      ? "YOUR COLLECTION"
-                      : tag
-                        ? "FOLLOW A THREAD"
-                        : query
-                          ? "A LITTLE RECALL"
-                          : "YOUR PERSONAL LIBRARY"}
-                  </span>
                   <h1>
                     {query
-                      ? "There it is. Somewhere in here."
+                      ? "Search results"
                       : tag
-                        ? `A little more about #${tag}.`
+                        ? `#${tag}`
                         : libraryTitle}
                   </h1>
-                  <p>
-                    {nav === "archive"
-                      ? "Saved pages you’ve put aside. Restore one whenever you need it."
-                      : currentCollection
-                        ? `${visible.length} ${visible.length === 1 ? "memory" : "memories"}, a shared thread, and room for one more.`
-                        : "A useful detail is never very far away."}
-                  </p>
                 </div>
               )}
               <div className="memory-stats">
@@ -789,7 +760,7 @@ export default function App() {
                 </span>
                 <span>
                   <Network size={14} />
-                  <strong>{tags.length}</strong> topics to explore
+                  <strong>{tags.length}</strong> topics
                 </span>
                 <span className="stats-privacy">
                   <ShieldCheck size={14} />
@@ -826,7 +797,6 @@ export default function App() {
                               : "Your memories")}
                         <span>{visible.length}</span>
                       </h2>
-                      <p>A few things worth coming back to.</p>
                     </div>
                     <div
                       className="view-controls"
@@ -865,7 +835,7 @@ export default function App() {
                       <input
                         ref={searchRef}
                         aria-label="Search your memories"
-                        placeholder="Find that thing you read…"
+                        placeholder="Search saved text, notes, and tags…"
                         value={query}
                         onChange={(e) => {
                           setQuery(e.target.value);
@@ -970,8 +940,7 @@ export default function App() {
                   {sampleCount > 0 && nav === "all" && !query && !tag && (
                     <div className="sample-banner">
                       <span>
-                        <Sparkles size={12} />A sample of what your memory could
-                        look like.
+                        <ScanSearch size={14} /> Example pages are included in this library.
                       </span>
                       <button onClick={() => setCapture({ scope: "all" })}>
                         Add your own <ArrowRight size={12} />
@@ -1025,15 +994,15 @@ export default function App() {
                       </div>
                       <h3>
                         {query || tag
-                          ? "A little less specific, maybe?"
+                          ? "No matching memories"
                           : nav === "archive"
-                            ? "Nothing tucked away yet."
-                            : "Your next good idea belongs here."}
+                            ? "No archived memories"
+                            : "No saved pages here yet"}
                       </h3>
                       <p>
                         {query || tag
                           ? "Try fewer words, or clear the tag filter. Search looks through saved titles, tags, summaries, and page text."
-                          : "Save a readable page and give your future self something to come back to."}
+                          : "Save page text so you can search and read it offline."}
                       </p>
                       {query || tag ? (
                         <button
@@ -1059,25 +1028,21 @@ export default function App() {
                   <div className="library-footer">
                     <span>
                       <HardDrive size={12} />
-                      Saved here. Ready when you are.
+                      Stored on this device
                     </span>
                     <span>
                       {visible.length}{" "}
-                      {visible.length === 1 ? "memory" : "memories"} ·{" "}
-                      {query
-                        ? "local keyword search"
-                        : "a little less to keep in your head"}
+                      {visible.length === 1 ? "memory" : "memories"}
                     </span>
                   </div>
                 </section>
                 <aside className="memory-aside">
                   <section className="connections-card">
                     <div className="aside-heading">
-                      <span>YOUR IDEAS, CONNECTED</span>
+                      <h3>Related topics</h3>
                       <Network size={16} />
                     </div>
-                    <h3>Follow a little thread.</h3>
-                    <p>Good ideas rarely live alone.</p>
+                    <p>Select a topic to filter saved pages.</p>
                     <TopicMap
                       memories={activeMemories}
                       onTag={filterTag}
@@ -1092,7 +1057,7 @@ export default function App() {
                   </section>
                   <section className="activity-card">
                     <div className="aside-heading">
-                      <span>A LITTLE ACTIVITY</span>
+                      <h3>Recent activity</h3>
                       <Clock3 size={14} />
                     </div>
                     {data.activity.length ? (
@@ -1123,24 +1088,12 @@ export default function App() {
                       ))
                     ) : (
                       <div className="fresh-activity">
-                        <span>✳</span>
-                        <strong>A fresh little start.</strong>
                         <p>
-                          Your captures and approved cloud requests will appear
-                          here.
+                          Saved pages and cloud requests will appear here.
                         </p>
                       </div>
                     )}
                   </section>
-                  <div className="aside-quote">
-                    <span>✳</span>
-                    <p>
-                      Good ideas deserve
-                      <br />
-                      <em>a return visit.</em>
-                    </p>
-                    <i>THAT’S WHAT WE’RE HERE FOR.</i>
-                  </div>
                 </aside>
               </div>
             </>
@@ -1151,9 +1104,8 @@ export default function App() {
             <BrandMark />
             tab brain
           </span>
-          <span>A little space for everything you find.</span>
           <button onClick={() => navigate("settings")}>
-            Your privacy, in plain words <ArrowUpRight size={11} />
+            Settings & privacy <ArrowUpRight size={11} />
           </button>
         </footer>
       </div>

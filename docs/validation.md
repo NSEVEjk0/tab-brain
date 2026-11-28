@@ -1,5 +1,15 @@
 # What we checked
 
+## November 28 release checks
+
+The build passed 54 unit tests and all 15 desktop, mobile, and unpacked-extension browser scenarios. The extension captured 15 sample tabs and kept pinned and navigated tabs open. Saved pages and notes survived reload and offline search. Automated accessibility checks found no violations in the library, Ask, Settings, Reminders, and four core dialogs across both themes. The mobile header was checked at 320 and 390 pixels.
+
+A fresh headed Google Chrome profile opened the production app and verified the four-source comparison preview, including removing a source. Firebase App Check returned HTTP 403 during browser verification. The approved comparison stopped at the same check. Zero source excerpts reached the Gemini generation endpoint. A separate November 18 production run had verified the browser and returned a real answer. Current public cloud generation is open until a new hosted browser session succeeds. [November 28 browser check](evidence/app-check-20261128.json)
+
+Personal capture, offline search, and browser reminders are available in the public app. Scheduled inbox delivery needs a configured sender and is disabled on the public deployment. The browser downloaded a reading brief offline. The email delivery policy passed all three unit checks and eight Firestore emulator scenarios with a test mail transport.
+
+## November 26 release checks
+
 On November 26, the current app build passed 54 unit tests, 15 desktop, mobile, and unpacked-extension browser tests, and two public-site checks. The public site served both download bundles with matching checksums. An App Check regression test ran the Firebase SDK with simulated responses. It switched verification methods in Settings, checked that source text stayed local until approval, and verified the saved citation and brief download. All three email policy tests and eight Firestore emulator tests passed.
 
 Google Chrome 157 ran the fixed build and generated a [new on-device Firebase AI Logic summary](evidence/nano-20261126-retest.json) without cloud configuration. It kept the original text and found it after an offline reload. The [GitHub run](https://github.com/NSEVEjk0/tab-brain/actions/runs/45808117957) recorded zero cloud generation requests.

@@ -188,11 +188,8 @@ export function AskView({
     <div className="ask-view">
       <div className="page-title-row">
         <div>
-          <span className="eyebrow">A QUESTION, A FEW GOOD SOURCES</span>
-          <h1>Let your tabs talk to each other.</h1>
-          <p>
-            Go from “I read something about this” to an answer you can trace.
-          </p>
+          <h1>Ask my tabs</h1>
+          <p>Compare saved pages and follow each citation to its source.</p>
         </div>
         <span className="status-pill cloud-status">
           <Cloud size={13} />
@@ -203,7 +200,7 @@ export function AskView({
         className="hybrid-flow"
         aria-label="How your sources become an answer"
       >
-        <div>
+        <div className="flow-device">
           <span>1</span>
           <strong>Save on your device</strong>
           <p>
@@ -214,10 +211,10 @@ export function AskView({
         </div>
         <div className={reviewing ? "flow-active" : ""}>
           <span>2</span>
-          <strong>Review the handoff</strong>
+          <strong>Review the excerpts</strong>
           <p>Choose the exact source snippets you want to share.</p>
         </div>
-        <div className={busy ? "flow-active" : ""}>
+        <div className={busy ? "flow-cloud flow-active" : "flow-cloud"}>
           <span>3</span>
           <strong>
             {config ? cloudModelName(config.model) : "Gemini"} in the cloud
@@ -231,8 +228,7 @@ export function AskView({
             <div className="ask-brand">
               <BrandMark />
             </div>
-            <span className="eyebrow">ASK MY TABS</span>
-            <h2>What’s on your mind?</h2>
+            <h2>Start with a question</h2>
             <p>
               Choose a question. We’ll find relevant memories on your device,
               then let you review every snippet before Gemini sees it.

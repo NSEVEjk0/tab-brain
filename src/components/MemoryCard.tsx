@@ -15,16 +15,8 @@ import type { Memory } from "../types";
 import { formatReminder } from "../reminders";
 
 export function MemoryCover({ memory }: { memory: Memory }) {
-  const noun = memory.tags[0]?.replace(/-/g, " ") || "a good idea";
   return (
     <div className={`memory-cover color-${memory.color}`} aria-hidden="true">
-      <span className="cover-label">
-        {memory.kind === "tool"
-          ? "THE TOOLKIT"
-          : memory.kind === "documentation"
-            ? "BUILD NOTES"
-            : "THE READING ROOM"}
-      </span>
       {memory.cover === "orbit" && (
         <div className="cover-orbits">
           <div />
@@ -40,17 +32,7 @@ export function MemoryCover({ memory }: { memory: Memory }) {
             <i />
             <i />
           </div>
-          <code>
-            <span>const</span> ideas = <em>keep</em>({"{"}
-            <br />
-            <b> curious:</b> true,
-            <br />
-            <b> space:</b> 'to think'
-            <br />
-            {"}"});
-            <br />
-            <small>// make it yours.</small>
-          </code>
+          <div className="cover-code-lines"><i /><i /><i /><i /></div>
         </div>
       )}
       {memory.cover === "window" && (
@@ -59,7 +41,6 @@ export function MemoryCover({ memory }: { memory: Memory }) {
             <i />
             <i />
             <i />
-            <span>your next good idea</span>
           </div>
           <div className="browser-demo">
             <aside />
@@ -82,22 +63,13 @@ export function MemoryCover({ memory }: { memory: Memory }) {
           <i />
           <i />
           <i />
-          <span className="garden-word">
-            let ideas
-            <br />
-            <em>grow.</em>
-          </span>
         </div>
       )}
       {memory.cover === "quote" && (
         <div className="cover-quote">
           <span>“</span>
-          <p>
-            {memory.source === "sample"
-              ? "A little space for a bigger thought."
-              : noun + ", remembered."}
-          </p>
-          <i>FILED UNDER CURIOSITY</i>
+          <i />
+          <i />
         </div>
       )}
       {memory.cover === "layers" && (
@@ -105,16 +77,8 @@ export function MemoryCover({ memory }: { memory: Memory }) {
           <i />
           <i />
           <i />
-          <span>
-            little things,
-            <br />
-            <em>connected.</em>
-          </span>
         </div>
       )}
-      <span className="cover-number">
-        TB / {memory.tags.length.toString().padStart(2, "0")}
-      </span>
     </div>
   );
 }

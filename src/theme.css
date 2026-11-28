@@ -61,6 +61,10 @@
   box-shadow: 0 0 0 3px #91b36e25;
 }
 
+:root[data-theme="dark"] .library-search input {
+  background: transparent;
+}
+
 :root[data-theme="dark"] input[type="checkbox"] {
   accent-color: var(--accent);
 }
@@ -69,7 +73,6 @@
   :is(
     .topbar,
     .top-install,
-    .welcome-banner,
     .view-controls,
     .library-search,
     .library-search kbd,
@@ -82,7 +85,6 @@
     .connections-card,
     .full-topic-card,
     .activity-symbol,
-    .aside-quote,
     .workspace-footer,
     .modal,
     .modal-head > .icon-button,
@@ -155,14 +157,10 @@
     .breadcrumb > svg,
     .connection-indicator,
     .model-indicator,
-    .hero-eyebrow,
-    .welcome-banner p,
-    .hero-art-caption,
     .memory-stats,
     .memory-stats > span > svg,
     .stats-export,
     .tooltip,
-    .section-heading p,
     .view-controls button,
     .library-search,
     .library-search kbd,
@@ -183,8 +181,6 @@
     .activity-item p,
     .activity-item small,
     .fresh-activity p,
-    .aside-quote p,
-    .aside-quote i,
     .workspace-footer,
     .workspace-footer > span:first-child,
     .modal-intro,
@@ -271,7 +267,6 @@
 :root[data-theme="dark"]
   :is(
     .breadcrumb strong,
-    .welcome-banner h1,
     .memory-stats strong,
     .card-title,
     .modal-head h2,
@@ -309,8 +304,6 @@
   :is(
     .text-link,
     .text-link:hover,
-    .tiny-star,
-    .hero-ask,
     .sample-banner button,
     .active-filter strong,
     .analysis-badge.real-ai,
@@ -318,11 +311,7 @@
     .favorite-button:hover,
     .selection-toolbar > span,
     .library-empty > div,
-    .connections-card h3,
     .activity-item strong,
-    .fresh-activity strong,
-    .fresh-activity > span,
-    .aside-quote > span,
     .toast p,
     .setting-icon.green,
     .setup-guide summary,
@@ -360,7 +349,6 @@
 :root[data-theme="dark"]
   :is(
     .top-install,
-    .welcome-banner,
     .section-heading h2 > span,
     .view-controls,
     .library-search,
@@ -474,10 +462,6 @@
   color: var(--accent);
 }
 
-:root[data-theme="dark"] .button-shortcut {
-  color: var(--on-accent);
-}
-
 :root[data-theme="dark"]
   :is(
     .library-search:focus-within,
@@ -494,7 +478,7 @@
 }
 
 :root[data-theme="dark"] .sidebar {
-  background: #18221c;
+  background: #152825;
   border-right-color: var(--line);
 }
 
@@ -581,18 +565,6 @@
   box-shadow: 4px 5px 0 #070e0b25;
 }
 
-:root[data-theme="dark"]
-  :is(
-    .cover-code code,
-    .cover-code code > span,
-    .cover-code code em,
-    .cover-code code b,
-    .cover-code code small,
-    .window-dots span
-  ) {
-  color: #bbcec2;
-}
-
 :root[data-theme="dark"] .topic-map rect + .topic-node > circle,
 :root[data-theme="dark"] .topic-node > circle {
   stroke: var(--paper);
@@ -676,6 +648,18 @@
 
 :root[data-theme="dark"] .hybrid-flow {
   background: var(--line);
+}
+
+:root[data-theme="dark"] :is(.hero-tool small, .hero-tool > svg) {
+  color: var(--tool-accent);
+}
+
+:root[data-theme="dark"] .hybrid-flow > .flow-cloud {
+  background: var(--purple-surface);
+}
+
+:root[data-theme="dark"] .hybrid-flow > .flow-cloud.flow-active {
+  background: #423550;
 }
 
 :root[data-theme="dark"] progress,
